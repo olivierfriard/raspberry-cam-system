@@ -34,6 +34,8 @@ __version_date__ = "2023-11-14"
 VCGENCMD_PATH = "/usr/bin/vcgencmd"
 # CAMERA_COMMAND = "libcamera-still" # deprecated on Debian trixie
 CAMERA_COMMAND = "rpicam-still"
+# VIDEO_COMMAND = "libcamera-vid"
+VIDEO_COMMAND = "rpicam-vid"
 
 
 def is_camera_detected():
@@ -148,7 +150,7 @@ def recording_video_active():
             [
                 x
                 for x in processes_list
-                if "libcamera-vid" in x and "libcamera-vid -t 0" not in x
+                if VIDEO_COMMAND in x and "libcamera-vid -t 0" not in x
             ]
         )
         > 0
@@ -212,7 +214,7 @@ class Libcamera_vid_thread(threading.Thread):
         logging.info("start libcamera-vid thread")
 
         command_line = [
-            "libcamera-vid",
+            VIDEO_COMMAND,
         ]
 
         for key in self.parameters:
@@ -675,7 +677,7 @@ def stop_video():
     Stop the video recording
     """
 
-    subprocess.run(["sudo", "killall", "libcamera-vid"])
+    subprocess.run(["sudo", "killall", VIDEO_COMMAND])
     time.sleep(2)
 
     if not recording_video_active():
@@ -769,7 +771,7 @@ def view_video_recording_schedule():
     output = []
     try:
         for job in cron:
-            if "libcamera-vid" in job.command:
+            if VIDEO_COMMAND in job.command:
                 output.append(
                     [
                         str(job.minutes),
@@ -802,7 +804,7 @@ def delete_video_recording_schedule():
     cron = CronTab(user="pi")
     try:
         for job in cron:
-            if "libcamera-vid" in job.command:
+            if VIDEO_COMMAND in job.command:
                 cron.remove(job)
         cron.write()
     except Exception:
