@@ -436,9 +436,9 @@ def status():
 
         return server_info
 
-    except Exception:
-        raise
-        return {"status": "Not available"}
+    except Exception as e:
+        # raise
+        return {"status": "Not available", "error": e}
 
 
 @app.route(
