@@ -32,6 +32,8 @@ __version_date__ = "2023-11-14"
 
 
 VCGENCMD_PATH = "/usr/bin/vcgencmd"
+# CAMERA_COMMAND = "libcamera-still" # deprecated on Debian trixie
+CAMERA_COMMAND = "rpicam-still"
 
 
 def is_camera_detected():
@@ -159,9 +161,7 @@ def time_lapse_active():
     """
     process = subprocess.run(["ps", "auxwg"], stdout=subprocess.PIPE)
     processes_list = process.stdout.decode("utf-8").split("\n")
-    return (
-        len([x for x in processes_list if "libcamera-still" in x and " -q " in x]) > 0
-    )
+    return len([x for x in processes_list if CAMERA_COMMAND in x and " -q " in x]) > 0
 
 
 def get_cpu_temperature() -> str:
@@ -501,7 +501,7 @@ def schedule_time_lapse():
     logging.info(f"crontab event: {crontab_event}")
 
     command_line = [
-        "libcamera-still",
+        CAMERA_COMMAND,
         "-q",
         "90",
     ]
@@ -580,7 +580,7 @@ def view_time_lapse_schedule():
     output = []
     try:
         for job in cron:
-            if "libcamera-still" in job.command:
+            if CAMERA_COMMAND in job.command:
                 output.append(
                     [
                         str(job.minutes),
@@ -613,7 +613,7 @@ def delete_time_lapse_schedule():
     cron = CronTab(user="pi")
     try:
         for job in cron:
-            if "libcamera-still" in job.command:
+            if CAMERA_COMMAND in job.command:
                 cron.remove(job)
         cron.write()
     except Exception:
@@ -918,7 +918,7 @@ def stop_time_lapse():
     Stop the time lapse
     """
 
-    subprocess.run(["sudo", "killall", "libcamera-still"])
+    subprocess.run(["sudo", "killall", CAMERA_COMMAND])
     time.sleep(5)
 
     if not time_lapse_active():
@@ -1018,7 +1018,7 @@ def take_picture():
         pass
 
     command_line = [
-        "libcamera-still",
+        CAMERA_COMMAND,
         # "--timeout", "5",
         "--nopreview",
         "-q",
