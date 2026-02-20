@@ -4,14 +4,15 @@ Raspberry Pi coordinator
 video recording module
 """
 
-import config_coordinator as cfg
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
-from PyQt5.QtCore import QThread, pyqtSignal, QObject, Qt
-import pathlib as pl
-import logging
-import requests
-import shutil
 import json
+import logging
+import pathlib as pl
+import shutil
+
+import config_coordinator as cfg
+import requests
+from PySide6.QtCore import QObject, Qt, QThread, Signal
+from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 
 
 class Download_videos_worker(QObject):
@@ -20,16 +21,18 @@ class Download_videos_worker(QObject):
         # list of Raspberry Pi IP
         self.raspberry_ip = raspberry_ip
 
-    start = pyqtSignal(str, list, str, str)
-    progress = pyqtSignal(str)
-    finished = pyqtSignal(list)
+    start = Signal(str, list, str, str)
+    progress = Signal(str)
+    finished = Signal(list)
 
     def run(self, raspberry_id, videos_list, download_dir, video_archive_dir):
         downloaded_video = []
         count = 0
         for video_file_name, video_size in sorted(videos_list):
             if (pl.Path(download_dir) / pl.Path(video_file_name)).is_file():
-                if (pl.Path(download_dir) / pl.Path(video_file_name)).stat().st_size == video_size:
+                if (
+                    pl.Path(download_dir) / pl.Path(video_file_name)
+                ).stat().st_size == video_size:
                     count += 1
                     continue
 
@@ -40,7 +43,9 @@ class Download_videos_worker(QObject):
                 stream=True,
                 verify=False,
             ) as r:
-                with open((pl.Path(download_dir) / pl.Path(video_file_name)), "wb") as file_out:
+                with open(
+                    (pl.Path(download_dir) / pl.Path(video_file_name)), "wb"
+                ) as file_out:
                     shutil.copyfileobj(r.raw, file_out)
 
             logging.info(f"{video_file_name} downloaded from {raspberry_id}")
@@ -83,7 +88,9 @@ def start_video_recording(self, raspberry_id):
         return
 
     if response.status_code != 200:
-        self.rasp_output_lb.setText(f"Failed to start recording video (status code: {response.status_code})")
+        self.rasp_output_lb.setText(
+            f"Failed to start recording video (status code: {response.status_code})"
+        )
         return
 
     self.rasp_output_lb.setText(response.json().get("msg", "Error recording video"))
@@ -104,9 +111,13 @@ def stop_video_recording(self, raspberry_id):
         return
 
     if response.status_code != 200:
-        self.rasp_output_lb.setText(f"Failed to stop recording video (status code: {response.status_code})")
+        self.rasp_output_lb.setText(
+            f"Failed to stop recording video (status code: {response.status_code})"
+        )
         return
-    self.rasp_output_lb.setText(response.json().get("msg", "Failed to stop recording video"))
+    self.rasp_output_lb.setText(
+        response.json().get("msg", "Failed to stop recording video")
+    )
 
     self.get_raspberry_status(raspberry_id)
     self.update_raspberry_display(raspberry_id)
@@ -260,7 +271,15 @@ def schedule_video_recording(self, raspberry_id):
         except Exception:
             try:
                 for x in dow_splt:
-                    if x.upper() not in ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]:
+                    if x.upper() not in [
+                        "SUN",
+                        "MON",
+                        "TUE",
+                        "WED",
+                        "THU",
+                        "FRI",
+                        "SAT",
+                    ]:
                         raise
                 int_dow_splt = dow_splt
             except Exception:
@@ -296,7 +315,9 @@ def schedule_video_recording(self, raspberry_id):
         "vflip": self.raspberry_info[raspberry_id]["video vflip"],
     }
 
-    response = self.request(raspberry_id, "/schedule_video_recording", type="POST", data=data)
+    response = self.request(
+        raspberry_id, "/schedule_video_recording", type="POST", data=data
+    )
     if response is None:
         return
 
@@ -306,7 +327,9 @@ def schedule_video_recording(self, raspberry_id):
         )
         return
 
-    self.rasp_output_lb.setText(response.json().get("msg", "Error during video recording scheduling"))
+    self.rasp_output_lb.setText(
+        response.json().get("msg", "Error during video recording scheduling")
+    )
     self.view_video_recording_schedule_clicked()
 
 
@@ -349,7 +372,11 @@ def delete_video_recording_schedule(self, raspberry_id):
             f"Error during deletion of the video recording scheduling (status code: {response.status_code})"
         )
         return
-    self.rasp_output_lb.setText(response.json().get("msg", "Error during deletion of the video recording scheduling"))
+    self.rasp_output_lb.setText(
+        response.json().get(
+            "msg", "Error during deletion of the video recording scheduling"
+        )
+    )
     self.view_video_recording_schedule_clicked()
 
 
@@ -363,7 +390,9 @@ def video_list(self, raspberry_id: str) -> list:
         return
 
     if response.status_code != 200:
-        self.rasp_output_lb.setText(f"Error requiring the list of recorded video (status code: {response.status_code})")
+        self.rasp_output_lb.setText(
+            f"Error requiring the list of recorded video (status code: {response.status_code})"
+        )
         return
     if "video_list" not in response.json():
         self.rasp_output_lb.setText(f"Error requiring the list of recorded video")
@@ -381,7 +410,9 @@ def download_videos(self, raspberry_id, download_dir=""):
         self.rasp_output_lb.setText(output)
 
     def thread_finished(downloaded_video_list):
-        self.rasp_output_lb.setText(f"{len(downloaded_video_list)} videos downloaded in <b>{download_dir}</b>")
+        self.rasp_output_lb.setText(
+            f"{len(downloaded_video_list)} videos downloaded in <b>{download_dir}</b>"
+        )
         self.video_list_clicked()
         self.video_download_thread.quit
 
@@ -419,7 +450,9 @@ def download_videos(self, raspberry_id, download_dir=""):
     if response == None:
         return
     if response.status_code != 200:
-        self.rasp_output_lb.setText(f"Error requiring the video archive dir (status code: {response.status_code})")
+        self.rasp_output_lb.setText(
+            f"Error requiring the video archive dir (status code: {response.status_code})"
+        )
         return
     if response.json().get("error", True):
         self.rasp_output_lb.setText(f"Error requiring the video archive dir")
@@ -434,7 +467,9 @@ def download_videos(self, raspberry_id, download_dir=""):
     self.video_download_worker.start.connect(self.video_download_worker.run)
     self.video_download_worker.progress.connect(thread_progress)
     self.video_download_worker.finished.connect(thread_finished)
-    self.video_download_worker.start.emit(raspberry_id, video_list_to_download, download_dir, remote_video_archive_dir)
+    self.video_download_worker.start.emit(
+        raspberry_id, video_list_to_download, download_dir, remote_video_archive_dir
+    )
 
 
 def delete_videos(self, raspberry_id):
@@ -454,18 +489,25 @@ def delete_videos(self, raspberry_id):
                     break
 
     response = self.request(
-        raspberry_id, "/delete_video", type="POST", data={"video list": json.dumps(video_list_to_delete)}
+        raspberry_id,
+        "/delete_video",
+        type="POST",
+        data={"video list": json.dumps(video_list_to_delete)},
     )
     if response == None:
         return
 
     if response.status_code != 200:
-        self.rasp_output_lb.setText(f"Error deleting the video (status code: {response.status_code})")
+        self.rasp_output_lb.setText(
+            f"Error deleting the video (status code: {response.status_code})"
+        )
         return
 
     self.all_video_cb.setCheckState(False)
     self.all_new_video_cb.setCheckState(False)
-    self.rasp_output_lb.setText(response.json().get("msg", "Error during deleting the video"))
+    self.rasp_output_lb.setText(
+        response.json().get("msg", "Error during deleting the video")
+    )
     self.video_list_clicked()
     self.get_raspberry_status(raspberry_id)
     self.update_raspberry_display(raspberry_id)

@@ -1,23 +1,26 @@
-from PyQt5.QtCore import QDir, Qt, QUrl
-from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
-from PyQt5.QtMultimediaWidgets import QVideoWidget   #  sudo apt install libqt5multimedia5-plugins
-from PyQt5.QtWidgets import (
-    QMainWindow,
-    QWidget,
-    QPushButton,
+import sys
+
+from PySide6.QtCore import QDir, Qt, QUrl
+from PySide6.QtMultimedia import QMediaContent, QMediaPlayer
+from PySide6.QtMultimediaWidgets import (
+    QVideoWidget,  #  sudo apt install libqt5multimedia5-plugins
+)
+from PySide6.QtWidgets import (
     QApplication,
-    QLabel,
     QFileDialog,
+    QLabel,
+    QMainWindow,
+    QPushButton,
     QStyle,
     QVBoxLayout,
+    QWidget,
 )
-import sys
 
 
 class VideoPlayer(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PyQt5 Video Player")
+        self.setWindowTitle("PySide6 Video Player")
 
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         videoWidget = QVideoWidget()

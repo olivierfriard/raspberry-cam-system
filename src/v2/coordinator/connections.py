@@ -3,8 +3,10 @@ Raspberry Pi coordinator
 
 connections
 """
-from PyQt5.QtWidgets import QSpinBox, QCheckBox, QComboBox, QDoubleSpinBox
+
 import pprint
+
+from PySide6.QtWidgets import QCheckBox, QComboBox, QDoubleSpinBox, QSpinBox
 
 
 def get_widgets_list(self):
@@ -60,11 +62,17 @@ def widget_value_changed(self):
 
     if self.current_raspberry_id:
         if isinstance(self.sender(), QComboBox):
-            self.raspberry_info[self.current_raspberry_id][self.sender().accessibleName()] = self.sender().currentText()
+            self.raspberry_info[self.current_raspberry_id][
+                self.sender().accessibleName()
+            ] = self.sender().currentText()
         if isinstance(self.sender(), QSpinBox):
-            self.raspberry_info[self.current_raspberry_id][self.sender().accessibleName()] = self.sender().value()
+            self.raspberry_info[self.current_raspberry_id][
+                self.sender().accessibleName()
+            ] = self.sender().value()
         if isinstance(self.sender(), QCheckBox):
-            self.raspberry_info[self.current_raspberry_id][self.sender().accessibleName()] = self.sender().isChecked()
+            self.raspberry_info[self.current_raspberry_id][
+                self.sender().accessibleName()
+            ] = self.sender().isChecked()
 
         # pprint.pprint(self.raspberry_info[self.current_raspberry_id])
 
