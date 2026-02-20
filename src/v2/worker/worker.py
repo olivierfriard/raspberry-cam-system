@@ -6,30 +6,26 @@ to enable the service at boot:
 sudo systemctl enable worker
 """
 
-
-from flask import Flask, request, send_from_directory, Response
-from crontab import CronTab  # from python-crontab (not crontab)
-
-import threading
-import datetime
-import time
-import subprocess
-import socket
-import logging
 import base64
+import datetime
 
 # required by get_hw_addr function
 import fcntl
-import struct
-
-import pathlib as pl
-import shutil
 import hashlib
 import json
-
+import logging
+import pathlib as pl
+import shutil
+import socket
+import struct
+import subprocess
+import threading
+import time
 from functools import wraps
 
 import config as cfg
+from crontab import CronTab  # from python-crontab (not crontab)
+from flask import Flask, Response, request, send_from_directory
 
 __version__ = "35"
 __version_date__ = "2023-11-14"
@@ -56,7 +52,9 @@ def is_camera_detected():
                           3280x2464 [21.19 fps - (0, 0)/3280x2464 crop]
 
     """
-    process = subprocess.run(["libcamera-hello", "--list-cameras"], stdout=subprocess.PIPE)
+    process = subprocess.run(
+        ["libcamera-hello", "--list-cameras"], stdout=subprocess.PIPE
+    )
     output = process.stdout.decode("utf-8").strip()
     return output
 
@@ -69,7 +67,9 @@ def get_hw_addr(ifname):
 
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        info = fcntl.ioctl(s.fileno(), 0x8927, struct.pack("256s", bytes(ifname, "utf-8")[:15]))
+        info = fcntl.ioctl(
+            s.fileno(), 0x8927, struct.pack("256s", bytes(ifname, "utf-8")[:15])
+        )
         return ":".join("%02x" % b for b in info[18:24])
     except Exception:
         return "Not determined"
@@ -95,7 +95,9 @@ def get_ip():
 
 def get_timezone():
     try:
-        return str(datetime.datetime.now().astimezone().tzinfo.utcoffset(None).seconds / 3600)
+        return str(
+            datetime.datetime.now().astimezone().tzinfo.utcoffset(None).seconds / 3600
+        )
     except Exception:
         return "Not determined"
 
@@ -123,7 +125,16 @@ def video_streaming_active():
 
     process = subprocess.run(["ps", "auxwg"], stdout=subprocess.PIPE)
     processes_list = process.stdout.decode("utf-8").split("\n")
-    return len([x for x in processes_list if "/usr/bin/vlc -I dummy stream:///dev/stdin" in x]) > 0
+    return (
+        len(
+            [
+                x
+                for x in processes_list
+                if "/usr/bin/vlc -I dummy stream:///dev/stdin" in x
+            ]
+        )
+        > 0
+    )
 
 
 def recording_video_active():
@@ -132,7 +143,16 @@ def recording_video_active():
     """
     process = subprocess.run(["ps", "auxwg"], stdout=subprocess.PIPE)
     processes_list = process.stdout.decode("utf-8").split("\n")
-    return len([x for x in processes_list if "libcamera-vid" in x and "libcamera-vid -t 0" not in x]) > 0
+    return (
+        len(
+            [
+                x
+                for x in processes_list
+                if "libcamera-vid" in x and "libcamera-vid -t 0" not in x
+            ]
+        )
+        > 0
+    )
 
 
 def time_lapse_active():
@@ -141,7 +161,9 @@ def time_lapse_active():
     """
     process = subprocess.run(["ps", "auxwg"], stdout=subprocess.PIPE)
     processes_list = process.stdout.decode("utf-8").split("\n")
-    return len([x for x in processes_list if "libcamera-still" in x and " -q " in x]) > 0
+    return (
+        len([x for x in processes_list if "libcamera-still" in x and " -q " in x]) > 0
+    )
 
 
 def get_cpu_temperature() -> str:
@@ -203,8 +225,18 @@ class Libcamera_vid_thread(threading.Thread):
             elif self.parameters[key] != "False":
                 command_line.extend([f"--{key}", f"{self.parameters[key]}"])
 
-        file_name = datetime.datetime.now().replace(microsecond=0).isoformat().replace("T", "_").replace(":", "")
-        prefix = (self.parameters["prefix"] + "_") if self.parameters.get("prefix", "") else ""
+        file_name = (
+            datetime.datetime.now()
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("T", "_")
+            .replace(":", "")
+        )
+        prefix = (
+            (self.parameters["prefix"] + "_")
+            if self.parameters.get("prefix", "")
+            else ""
+        )
 
         file_path = str(
             pl.Path(__file__).resolve().parent
@@ -285,13 +317,25 @@ else:
 (pl.Path(__file__).resolve().parent / cfg.STATIC_DIR).mkdir(parents=True, exist_ok=True)
 
 # create VIDEO_ARCHIVE_DIR
-(pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR)).mkdir(parents=True, exist_ok=True)
+(
+    pl.Path(__file__).resolve().parent
+    / pl.Path(cfg.STATIC_DIR)
+    / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+).mkdir(parents=True, exist_ok=True)
 
 # create TIME_LAPSE_ARCHIVE_DIR
-(pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)).mkdir(parents=True, exist_ok=True)
+(
+    pl.Path(__file__).resolve().parent
+    / pl.Path(cfg.STATIC_DIR)
+    / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+).mkdir(parents=True, exist_ok=True)
 
 # create LIVE_PICTURES_ARCHIVE_DIR
-(pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)).mkdir(parents=True, exist_ok=True)
+(
+    pl.Path(__file__).resolve().parent
+    / pl.Path(cfg.STATIC_DIR)
+    / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+).mkdir(parents=True, exist_ok=True)
 
 
 app = Flask(__name__, static_url_path=f"/{cfg.STATIC_DIR}")
@@ -307,7 +351,12 @@ def security_key_required(f):
                 status_code = Response(status=204)
                 return status_code
 
-            if hashlib.sha256(request.values.get("key", "").encode("utf-8")).hexdigest() != security_key_sha256:
+            if (
+                hashlib.sha256(
+                    request.values.get("key", "").encode("utf-8")
+                ).hexdigest()
+                != security_key_sha256
+            ):
                 status_code = Response(
                     status=204
                 )  # 204 No Content     The server successfully processed the request, and is not returning any content.
@@ -367,7 +416,10 @@ def status():
 
         server_info = {
             "status": "OK",
-            "server_datetime": datetime.datetime.now().replace(microsecond=0).isoformat().replace("T", " "),
+            "server_datetime": datetime.datetime.now()
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("T", " "),
             "server_version": __version__,
             "MAC_addr": get_hw_addr(cfg.WIFI_INTERFACE),
             "hostname": socket.gethostname(),
@@ -385,6 +437,7 @@ def status():
         return server_info
 
     except Exception:
+        raise
         return {"status": "Not available"}
 
 
@@ -442,7 +495,10 @@ def schedule_time_lapse():
 
     crontab_event = request.values.get("crontab", "")
     if not crontab_event:
-        return {"error": True, "msg": "Time lapse NOT configured. Crontab event not found"}
+        return {
+            "error": True,
+            "msg": "Time lapse NOT configured. Crontab event not found",
+        }
 
     logging.info(f"crontab event: {crontab_event}")
 
@@ -470,8 +526,10 @@ def schedule_time_lapse():
         and request.values["timelapse"] != "0"
     ):
         command_line.extend(["--timeout", str(int(request.values["timeout"]) * 1000)])
-        command_line.extend(["--timelapse", str(int(request.values["timelapse"]) * 1000)])
-        comment = f'time-lapse for {request.values["timeout"]} s (every {request.values["timelapse"]} s)'
+        command_line.extend(
+            ["--timelapse", str(int(request.values["timelapse"]) * 1000)]
+        )
+        comment = f"time-lapse for {request.values['timeout']} s (every {request.values['timelapse']} s)"
 
     command_line.extend(
         [
@@ -498,7 +556,10 @@ def schedule_time_lapse():
     try:
         job.setall(crontab_event)
     except Exception:
-        return {"error": True, "msg": f"Time lapse NOT scheduled. '{crontab_event}' is not valid."}
+        return {
+            "error": True,
+            "msg": f"Time lapse NOT scheduled. '{crontab_event}' is not valid.",
+        }
 
     cron.write()
 
@@ -522,7 +583,16 @@ def view_time_lapse_schedule():
     try:
         for job in cron:
             if "libcamera-still" in job.command:
-                output.append([str(job.minutes), str(job.hours), str(job.dom), str(job.month), str(job.dow), job.comment])
+                output.append(
+                    [
+                        str(job.minutes),
+                        str(job.hours),
+                        str(job.dom),
+                        str(job.month),
+                        str(job.dow),
+                        job.comment,
+                    ]
+                )
 
     except Exception:
         return {"error": True, "msg": "Error during time lapse schedule view."}
@@ -576,7 +646,9 @@ def start_video():
         return {"msg": "The video cannot be recorded because the time lapse is active"}
 
     if video_streaming_active():
-        return {"msg": "The video cannot be recorded because the video streaming is active"}
+        return {
+            "msg": "The video cannot be recorded because the video streaming is active"
+        }
 
     logging.info(
         f"Starting video recording for {int(request.values['timeout']) / 1000} s ({request.values['width']}x{request.values['height']})"
@@ -630,7 +702,10 @@ def schedule_video_recording():
 
     crontab_event = request.values.get("crontab", "")
     if not crontab_event:
-        return {"error": True, "msg": "Video recording NOT configured. Crontab event not found"}
+        return {
+            "error": True,
+            "msg": "Video recording NOT configured. Crontab event not found",
+        }
 
     command_line = [
         "killall libcamera-vid;libcamera-vid",
@@ -644,7 +719,9 @@ def schedule_video_recording():
         elif request.values[key] != "False":
             command_line.extend([f"--{key}", f"{request.values[key]}"])
 
-    prefix = (request.values["prefix"] + "_") if request.values.get("prefix", "") else ""
+    prefix = (
+        (request.values["prefix"] + "_") if request.values.get("prefix", "") else ""
+    )
 
     """
     file_path = (
@@ -661,14 +738,17 @@ def schedule_video_recording():
 
     logging.info(" ".join(command_line))
 
-    comment = f'recording for {round(int(request.values["timeout"]) / 1000)} s'
+    comment = f"recording for {round(int(request.values['timeout']) / 1000)} s"
 
     cron = CronTab(user="pi")
     job = cron.new(command=" ".join(command_line), comment=comment)
     try:
         job.setall(crontab_event)
     except Exception:
-        return {"error": True, "msg": f"Video recording NOT scheduled. '{crontab_event}' is not valid."}
+        return {
+            "error": True,
+            "msg": f"Video recording NOT scheduled. '{crontab_event}' is not valid.",
+        }
 
     cron.write()
 
@@ -692,7 +772,16 @@ def view_video_recording_schedule():
     try:
         for job in cron:
             if "libcamera-vid" in job.command:
-                output.append([str(job.minutes), str(job.hours), str(job.dom), str(job.month), str(job.dow), job.comment])
+                output.append(
+                    [
+                        str(job.minutes),
+                        str(job.hours),
+                        str(job.dom),
+                        str(job.month),
+                        str(job.dow),
+                        job.comment,
+                    ]
+                )
 
     except Exception:
         return {"error": True, "msg": "Error during video recording view."}
@@ -740,7 +829,11 @@ def video_list():
     return {
         "video_list": [
             (x.name, x.stat().st_size)
-            for x in (pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR)).glob("*.h264")
+            for x in (
+                pl.Path(__file__).resolve().parent
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+            ).glob("*.h264")
         ]
     }
 
@@ -761,7 +854,11 @@ def timelapse_pictures_list():
     return {
         "pictures_list": [
             (x.name, x.stat().st_size)
-            for x in (pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)).glob("*.jpg")
+            for x in (
+                pl.Path(__file__).resolve().parent
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+            ).glob("*.jpg")
         ]
     }
 
@@ -781,7 +878,11 @@ def live_pictures_list():
     return {
         "pictures_list": [
             (x.name, x.stat().st_size)
-            for x in (pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)).glob("*.jpg")
+            for x in (
+                pl.Path(__file__).resolve().parent
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+            ).glob("*.jpg")
         ]
     }
 
@@ -796,7 +897,13 @@ def live_pictures_list():
 @security_key_required
 def get_video(file_name):
     return send_from_directory(
-        str(pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR)), file_name, as_attachment=True
+        str(
+            pl.Path(__file__).resolve().parent
+            / pl.Path(cfg.STATIC_DIR)
+            / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+        ),
+        file_name,
+        as_attachment=True,
     )
 
 
@@ -858,7 +965,9 @@ def sync_time(date, hour):
 
     completed = subprocess.run(["sudo", "timedatectl", "set-ntp", "false"])
 
-    completed = subprocess.run(["sudo", "timedatectl", "set-time", f"{date} {hour}"])  # 2015-11-23 10:11:22
+    completed = subprocess.run(
+        ["sudo", "timedatectl", "set-time", f"{date} {hour}"]
+    )  # 2015-11-23 10:11:22
     if completed.returncode:
         return {"error": True, "msg": "Time not synchronised"}
     else:
@@ -881,17 +990,32 @@ def take_picture():
     logging.info("take picture init")
 
     if video_streaming_active():
-        return {"error": True, "msg": "Time lapse cannot be started because the video streaming is active"}
+        return {
+            "error": True,
+            "msg": "Time lapse cannot be started because the video streaming is active",
+        }
 
     if recording_video_active():
-        return {"error": True, "msg": "Time lapse cannot be started because the video recording is active"}
+        return {
+            "error": True,
+            "msg": "Time lapse cannot be started because the video recording is active",
+        }
 
     if time_lapse_active():
         return {"error": True, "msg": "The time lapse is already active"}
 
     # delete previous picture
     try:
-        completed = subprocess.run(["sudo", "rm", "-f", pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path("live.jpg")])
+        completed = subprocess.run(
+            [
+                "sudo",
+                "rm",
+                "-f",
+                pl.Path(__file__).resolve().parent
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path("live.jpg"),
+            ]
+        )
     except Exception:
         pass
 
@@ -927,7 +1051,9 @@ def take_picture():
         and request.values["timelapse"] != "0"
     ):
         command_line.extend(["--timeout", str(int(request.values["timeout"]) * 1000)])
-        command_line.extend(["--timelapse", str(int(request.values["timelapse"]) * 1000)])
+        command_line.extend(
+            ["--timelapse", str(int(request.values["timelapse"]) * 1000)]
+        )
         # command_line.extend(["--timestamp"])
 
         command_line.extend(
@@ -946,7 +1072,10 @@ def take_picture():
             subprocess.Popen(command_line)
         except Exception:
             logging.warning("Error running time lapse (wrong command line option)")
-            return {"error": 1, "msg": "Error running time lapse (wrong command line option)"}
+            return {
+                "error": 1,
+                "msg": "Error running time lapse (wrong command line option)",
+            }
         return {"error": False, "msg": "Time lapse running"}
 
     else:
@@ -964,7 +1093,16 @@ def take_picture():
                 ]
             )
         else:
-            command_line.extend(["-o", str(pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path("live.jpg"))])
+            command_line.extend(
+                [
+                    "-o",
+                    str(
+                        pl.Path(__file__).resolve().parent
+                        / pl.Path(cfg.STATIC_DIR)
+                        / pl.Path("live.jpg")
+                    ),
+                ]
+            )
 
         logging.info("command:" + (" ".join(command_line)))
 
@@ -972,7 +1110,10 @@ def take_picture():
             completed = subprocess.run(command_line)
         except Exception:
             logging.warning("Error taking picture (wrong command line option)")
-            return {"error": 1, "msg": "Error taking picture (wrong command line option)"}
+            return {
+                "error": 1,
+                "msg": "Error taking picture (wrong command line option)",
+            }
 
         if not completed.returncode:
             return {"error": False, "msg": "Picture taken successfully"}
@@ -1018,7 +1159,9 @@ def video_archive_dir():
     try:
         return {
             "error": False,
-            "msg": str(pl.Path("/") / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR)),
+            "msg": str(
+                pl.Path("/") / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+            ),
         }
     except Exception:
         return {"error": True}
@@ -1033,7 +1176,11 @@ def timelapse_pictures_archive_dir():
     try:
         return {
             "error": False,
-            "msg": str(pl.Path("/") / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)),
+            "msg": str(
+                pl.Path("/")
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+            ),
         }
     except Exception:
         return {"error": True}
@@ -1049,7 +1196,11 @@ def live_pictures_archive_dir():
     try:
         return {
             "error": False,
-            "msg": str(pl.Path("/") / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)),
+            "msg": str(
+                pl.Path("/")
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+            ),
         }
     except Exception:
         return {"error": True}
@@ -1072,9 +1223,12 @@ def delete_video():
         return {"error": True, "msg": "No video to delete"}
 
     for video_file_name, _ in json.loads(request.values.get("video list", "[]")):
-        (pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR) / pl.Path(video_file_name)).unlink(
-            missing_ok=True
-        )
+        (
+            pl.Path(__file__).resolve().parent
+            / pl.Path(cfg.STATIC_DIR)
+            / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+            / pl.Path(video_file_name)
+        ).unlink(missing_ok=True)
         (
             pl.Path(__file__).resolve().parent
             / pl.Path(cfg.STATIC_DIR)
@@ -1099,7 +1253,11 @@ def delete_live_pictures():
 
     logging.debug("Delete all the live pictures")
 
-    for file_path in (pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)).glob("*"):
+    for file_path in (
+        pl.Path(__file__).resolve().parent
+        / pl.Path(cfg.STATIC_DIR)
+        / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+    ).glob("*"):
         file_path.unlink(missing_ok=True)
     return {"error": False, "msg": "All live pictures deleted"}
 
@@ -1119,7 +1277,11 @@ def delete_timelapse_pictures():
 
     logging.debug("Delete all the time lapse pictures")
 
-    for file_path in (pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)).glob("*"):
+    for file_path in (
+        pl.Path(__file__).resolve().parent
+        / pl.Path(cfg.STATIC_DIR)
+        / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+    ).glob("*"):
         file_path.unlink(missing_ok=True)
     return {"error": False, "msg": "All time lapse pictures deleted"}
 

@@ -1004,6 +1004,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         logging.info(f"{ip_address}: server available")
 
+        print(f"{response.json()=}")
         # check hostname
         raspberry_id = response.json().get("hostname", "")
         if not raspberry_id:
@@ -1026,6 +1027,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         threads = []
         logging.info(f"Testing {ip_base_address} subnet")
         for ip in ip_list:
+            print(f"{ip=}")
             threads.append(threading.Thread(target=self.connect, args=(ip,)))
             threads[-1].start()
         for x in threads:
