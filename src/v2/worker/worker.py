@@ -52,9 +52,7 @@ def is_camera_detected():
                           3280x2464 [21.19 fps - (0, 0)/3280x2464 crop]
 
     """
-    process = subprocess.run(
-        ["libcamera-hello", "--list-cameras"], stdout=subprocess.PIPE
-    )
+    process = subprocess.run(["rpicam-hello", "--list-cameras"], stdout=subprocess.PIPE)
     output = process.stdout.decode("utf-8").strip()
     return output
 
