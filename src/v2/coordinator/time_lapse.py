@@ -203,6 +203,10 @@ def schedule_time_lapse(self, raspberry_id):
         )
         return
 
+    # use crontab to test:
+    # job = cron.new(command='test')
+    # job.setall('min hour DOM month DOW')
+
     # check hours format
     hours = self.picture_hours_le.text().replace(" ", "")
     if hours == "*":
