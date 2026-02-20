@@ -280,8 +280,12 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         self.shutdown_pb.clicked.connect(self.shutdown_clicked)
 
         # picture
-        self.take_picture_pb.clicked.connect(self.take_picture_clicked)
-        self.start_time_lapse_pb.clicked.connect(self.take_picture_clicked)
+        self.take_picture_pb.clicked.connect(
+            lambda: self.take_picture_clicked("take_picture_pb")
+        )
+        self.start_time_lapse_pb.clicked.connect(
+            lambda: self.take_picture_clicked("start_time_lapse_pb")
+        )
         self.stop_time_lapse_pb.clicked.connect(self.stop_time_lapse_clicked)
 
         self.picture_lb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -551,6 +555,8 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 )
             else:
                 if len(args) == 3:  # function has 2 arguments (self and an other)
+                    func(args[0], args[1])
+                elif len(args) == 2:
                     func(args[0], args[1])
                 else:
                     func(args[0])  # function has only the self argument
@@ -1526,17 +1532,17 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         self.picture_gain_sb.setEnabled(self.cb_enable_picture_parameters.isChecked())
 
     @verif
-    def take_picture_clicked(self):
+    def take_picture_clicked(self, source_name):
         """
         ask Raspberry Pi to take a picture
         """
 
-        if self.sender().objectName() == "take_picture_pb":
+        if source_name == "take_picture_pb":
             self.rasp_output_lb.setText("Picture requested")
             app.processEvents()
             time_lapse.take_picture(self, self.current_raspberry_id, mode="one")
 
-        if self.sender().objectName() == "start_time_lapse_pb":
+        if source_name == "start_time_lapse_pb":
             self.rasp_output_lb.setText("Time lapse requested")
             app.processEvents()
             time_lapse.take_picture(self, self.current_raspberry_id, mode="time lapse")

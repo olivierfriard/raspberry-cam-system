@@ -562,7 +562,7 @@ def download_live_pictures(self, raspberry_id, download_dir):
 
     # get pictures archive directory
     response = self.request(raspberry_id, "/live_pictures_archive_dir")
-    if response == None:
+    if response is None:
         return
     if response.status_code != 200:
         self.rasp_output_lb.setText(
@@ -570,7 +570,7 @@ def download_live_pictures(self, raspberry_id, download_dir):
         )
         return
     if response.json().get("error", True):
-        self.rasp_output_lb.setText(f"Error requiring the pictures archive directory")
+        self.rasp_output_lb.setText("Error requiring the pictures archive directory")
         return
     remote_pictures_archive_dir = response.json().get("msg", "")
 
