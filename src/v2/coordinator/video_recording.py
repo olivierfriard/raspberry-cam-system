@@ -9,7 +9,18 @@ import logging
 import pathlib as pl
 import shutil
 
-import config_coordinator as cfg
+try:
+    import config_coordinator_local as cfg
+except Exception:
+    print("file config_coordinator_local.py not found")
+    try:
+        import config_coordinator as cfg
+    except Exception:
+        print("file config_coordinator.py not found")
+        import sys
+
+        sys.exit()
+
 import requests
 from PySide6.QtCore import QObject, Qt, QThread, Signal
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem

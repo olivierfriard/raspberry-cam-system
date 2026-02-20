@@ -529,7 +529,9 @@ def schedule_time_lapse():
         command_line.extend(
             ["--timelapse", str(int(request.values["timelapse"]) * 1000)]
         )
-        comment = f"time-lapse for {request.values['timeout']} s (every {request.values['timelapse']} s)"
+
+    # comment = f"time-lapse for {request.values['timeout']} s (every {request.values['timelapse']} s)"
+    comment = "test comment"
 
     command_line.extend(
         [
