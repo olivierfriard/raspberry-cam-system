@@ -29,42 +29,40 @@ def take_picture(self, raspberry_id: str, mode: str):
     if raspberry_id not in self.raspberry_ip:
         return
 
-    if (
-        self.raspberry_info[raspberry_id]["status"]["status"] == "OK"
-    ):  # and self.raspberry_status[raspberry_id]:
-        width, height = self.raspberry_info[raspberry_id]["picture resolution"].split(
-            "x"
-        )
-        data = {
-            "key": self.security_key,
-            "width": width,
-            "height": height,
-            "rotation": self.raspberry_info[raspberry_id]["picture rotation"],
-            "hflip": self.raspberry_info[raspberry_id]["picture hflip"],
-            "vflip": self.raspberry_info[raspberry_id]["picture vflip"],
-            "timelapse": self.raspberry_info[raspberry_id]["time lapse wait"]
-            if mode == "time lapse"
-            else 0,
-            "timeout": self.raspberry_info[raspberry_id]["time lapse duration"]
-            if mode == "time lapse"
-            else 0,
-            "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
-        }
+    if self.raspberry_info[raspberry_id]["status"]["status"] != "OK":
+        return
 
-        if self.cb_enable_picture_parameters.isChecked():
-            data["brightness"] = self.raspberry_info[raspberry_id]["picture brightness"]
-            data["contrast"] = self.raspberry_info[raspberry_id]["picture contrast"]
-            data["saturation"] = self.raspberry_info[raspberry_id]["picture saturation"]
-            data["sharpness"] = self.raspberry_info[raspberry_id]["picture sharpness"]
-            data["gain"] = self.raspberry_info[raspberry_id]["picture gain"]
+    width, height = self.raspberry_info[raspberry_id]["picture resolution"].split("x")
+    data = {
+        "key": self.security_key,
+        "width": width,
+        "height": height,
+        "rotation": self.raspberry_info[raspberry_id]["picture rotation"],
+        "hflip": self.raspberry_info[raspberry_id]["picture hflip"],
+        "vflip": self.raspberry_info[raspberry_id]["picture vflip"],
+        "timelapse": self.raspberry_info[raspberry_id]["time lapse wait"]
+        if mode == "time lapse"
+        else 0,
+        "timeout": self.raspberry_info[raspberry_id]["time lapse duration"]
+        if mode == "time lapse"
+        else 0,
+        "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
+    }
 
-            # "ISO": self.raspberry_info[raspberry_id]['picture iso'],
+    if self.cb_enable_picture_parameters.isChecked():
+        data["brightness"] = self.raspberry_info[raspberry_id]["picture brightness"]
+        data["contrast"] = self.raspberry_info[raspberry_id]["picture contrast"]
+        data["saturation"] = self.raspberry_info[raspberry_id]["picture saturation"]
+        data["sharpness"] = self.raspberry_info[raspberry_id]["picture sharpness"]
+        data["gain"] = self.raspberry_info[raspberry_id]["picture gain"]
 
-        # add file name based on epoch
-        if mode == "one":
-            data["file_name"] = f"{str(int(time.time()))}.jpg"
+        # "ISO": self.raspberry_info[raspberry_id]['picture iso'],
 
-        response = self.request(raspberry_id, f"/take_picture", type="POST", data=data)
+    # add file name based on epoch
+    if mode == "one":
+        data["file_name"] = f"{str(int(time.time()))}.jpg"
+
+        response = self.request(raspberry_id, "/take_picture", type="POST", data=data)
 
         if response.status_code != 200:
             self.rasp_output_lb.setText(
@@ -80,13 +78,6 @@ def take_picture(self, raspberry_id: str, mode: str):
 
         self.rasp_output_lb.setText(response.json().get("msg", "Undefined error"))
         # app.processEvents()
-
-        # check if time lapse requested
-        if mode == "time lapse":
-            self.get_raspberry_status(raspberry_id)
-            self.update_raspberry_display(raspberry_id)
-            self.update_raspberry_dashboard(raspberry_id)
-            return
 
         try:
             response2 = requests.get(
@@ -123,6 +114,14 @@ def take_picture(self, raspberry_id: str, mode: str):
         self.update_raspberry_display(raspberry_id)
         self.update_raspberry_dashboard(raspberry_id)
 
+    # check if time lapse requested
+    if mode == "time lapse":
+        # rpicam-still -o image%05d.jpg --timelapse 30000 -t 3600000
+        self.get_raspberry_status(raspberry_id)
+        self.update_raspberry_display(raspberry_id)
+        self.update_raspberry_dashboard(raspberry_id)
+        return
+
 
 def stop_time_lapse(self, raspberry_id):
     """
@@ -132,7 +131,7 @@ def stop_time_lapse(self, raspberry_id):
         return
 
     response = self.request(raspberry_id, "/stop_time_lapse")
-    if response == None:
+    if response is None:
         return
 
     if response.status_code != 200:
@@ -157,9 +156,9 @@ def schedule_time_lapse(self, raspberry_id):
         QMessageBox.information(
             None,
             "Raspberry Pi coordinator",
-            f"Specify the hour(s) to start time lapse",
-            QMessageBox.Ok | QMessageBox.Default,
-            QMessageBox.NoButton,
+            "Specify the hour(s) to start time lapse",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+            QMessageBox.StandardButton.NoButton,
         )
         return
 
@@ -167,19 +166,19 @@ def schedule_time_lapse(self, raspberry_id):
         QMessageBox.information(
             None,
             "Raspberry Pi coordinator",
-            f"Specify the minutes(s) to start time lapse",
-            QMessageBox.Ok | QMessageBox.Default,
-            QMessageBox.NoButton,
-        )
+            "Specify the minutes(s) to start time lapse",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+            QMessageBox.StandardButton.NoButton,
+        ).StandardButton
         return
 
     if self.picture_days_of_week_le.text() == "":
         QMessageBox.information(
             None,
             "Raspberry Pi coordinator",
-            f"Specify the day(s) of the week to start time lapse (0-6 or SUN-SAT)",
-            QMessageBox.Ok | QMessageBox.Default,
-            QMessageBox.NoButton,
+            "Specify the day(s) of the week to start time lapse (0-6 or SUN-SAT)",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+            QMessageBox.StandardButton.NoButton,
         )
         return
 
@@ -187,9 +186,9 @@ def schedule_time_lapse(self, raspberry_id):
         QMessageBox.information(
             None,
             "Raspberry Pi coordinator",
-            f"Specify the day(s) of the month to start time lapse (1-31)",
-            QMessageBox.Ok | QMessageBox.Default,
-            QMessageBox.NoButton,
+            "Specify the day(s) of the month to start time lapse (1-31)",
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+            QMessageBox.StandardButton.NoButton,
         )
         return
 
@@ -208,9 +207,9 @@ def schedule_time_lapse(self, raspberry_id):
             QMessageBox.information(
                 None,
                 "Raspberry Pi coordinator",
-                f"The hour(s) format is not correct. Example; 1,2,13,15 or *",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                "The hour(s) format is not correct. Example; 1,2,13,15 or *",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
         hours_str = ",".join([str(x) for x in int_hours_list])
@@ -230,9 +229,9 @@ def schedule_time_lapse(self, raspberry_id):
             QMessageBox.information(
                 None,
                 "Raspberry Pi coordinator",
-                f"The minutes(s) format is not correct. Example; 1,2,13,15 or *",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                "The minutes(s) format is not correct. Example; 1,2,13,15 or *",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
 
@@ -253,9 +252,9 @@ def schedule_time_lapse(self, raspberry_id):
             QMessageBox.information(
                 None,
                 "Raspberry Pi coordinator",
-                f"The day(s) of month format is not correct. Example; 1,2,13,15 or *",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                "The day(s) of month format is not correct. Example; 1,2,13,15 or *",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
         dom_str = ",".join([str(x) for x in int_dom_list])
@@ -275,9 +274,9 @@ def schedule_time_lapse(self, raspberry_id):
             QMessageBox.information(
                 None,
                 "Raspberry Pi coordinator",
-                f"The month format is not correct. Example; 1,2,12 or *",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                "The month format is not correct. Example; 1,2,12 or *",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
         month_str = ",".join([str(x) for x in int_month_list])
@@ -308,9 +307,9 @@ def schedule_time_lapse(self, raspberry_id):
                 QMessageBox.information(
                     None,
                     "Raspberry Pi coordinator",
-                    f"The days(s) of week format is not correct. Example; 0,1,2 or SUN,MON,TUE",
-                    QMessageBox.Ok | QMessageBox.Default,
-                    QMessageBox.NoButton,
+                    "The days(s) of week format is not correct. Example; 0,1,2 or SUN,MON,TUE",
+                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                    QMessageBox.StandardButton.NoButton,
                 )
 
         dow_str = ",".join([str(x) for x in int_dow_splt])
