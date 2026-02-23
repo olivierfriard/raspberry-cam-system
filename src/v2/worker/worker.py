@@ -987,6 +987,9 @@ def sync_time(date, hour):
 def take_picture():
     """
     Start time lapse or take a picture and send it
+
+
+    rpicam-still --nopreview -q 90 --sharpness 2 --hflip --height 922 --contrast 1 --gain 1 --width 1640 --rotation 180 --vflip --saturation 1 --brightness 0 -o /home/pi/raspberry_video-recording_coordinator/src/v2/worker/static/live_pictures/1771862867.jpg
     """
 
     logging.info("take picture init")
