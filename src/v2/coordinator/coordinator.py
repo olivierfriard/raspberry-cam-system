@@ -1654,4 +1654,4 @@ if __name__ == "__main__":
     # apply_stylesheet(app, theme='light_blue.xml', invert_secondary=True,)
 
     rpi_coordinator.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
