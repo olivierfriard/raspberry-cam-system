@@ -9,8 +9,8 @@ TODO:
 
 """
 
-__version__ = "21"
-__version_date__ = "2023-05-16"
+__version__ = "22"
+__version_date__ = "2026-02-23"
 
 import argparse
 import base64
@@ -1010,7 +1010,6 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         logging.info(f"{ip_address}: server available")
 
-        print(f"{response.json()=}")
         # check hostname
         raspberry_id = response.json().get("hostname", "")
         if not raspberry_id:
@@ -1033,7 +1032,6 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         threads = []
         logging.info(f"Testing {ip_base_address} subnet")
         for ip in ip_list:
-            print(f"{ip=}")
             threads.append(threading.Thread(target=self.connect, args=(ip,)))
             threads[-1].start()
         for x in threads:
@@ -1456,8 +1454,6 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             }
             return {"status": f"not available (status code: {response.status_code})"}
 
-        print(f"{self.raspberry_info = }")
-
         self.raspberry_info[raspberry_id]["status"] = response.json()
         return response.json()
 
@@ -1539,13 +1535,10 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         if source_name == "take_picture_pb":
             self.rasp_output_lb.setText("Picture requested")
-            # app.processEvents()
             time_lapse.take_picture(self, self.current_raspberry_id, mode="one")
 
         if source_name == "start_time_lapse_pb":
             self.rasp_output_lb.setText("Time lapse requested")
-            # app.processEvents()
-            print("start_time_lapse_pb")
             time_lapse.take_picture(self, self.current_raspberry_id, mode="time lapse")
 
     @verif

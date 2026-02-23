@@ -23,7 +23,7 @@ except Exception:
         sys.exit()
 
 import requests
-from PySide6.QtCore import QObject, Qt, QThread, Signal
+from PySide6.QtCore import QObject, Qt, QThread, Signal, Slot
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
 
@@ -529,11 +529,11 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
         self.rasp_output_lb.setText(output)
 
     def thread_finished(downloaded_pictures_list):
+        self.pict_download_thread.quit()
         self.rasp_output_lb.setText(
             f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
         )
         self.video_list_clicked()
-        self.pict_download_thread.quit
 
     remote_pictures_list = get_timelapse_pictures_list(self, raspberry_id)
     if len(remote_pictures_list) == 0:
@@ -562,8 +562,8 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
     self.pict_download_worker.moveToThread(self.pict_download_thread)
 
     self.pict_download_worker.start.connect(self.pict_download_worker.run)
-    self.pict_download_worker.progress.connect(thread_progress)
-    self.pict_download_worker.finished.connect(thread_finished)
+    # self.pict_download_worker.progress.connect(thread_progress)
+    # self.pict_download_worker.finished.connect(thread_finished)
     self.pict_download_worker.start.emit(
         raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
     )

@@ -5,6 +5,7 @@ connections
 """
 
 import pprint
+from functools import partial
 
 from PySide6.QtWidgets import QCheckBox, QComboBox, QDoubleSpinBox, QSpinBox
 
@@ -44,37 +45,34 @@ def connect(self):
     for w in get_widgets_list(self):
         if w.accessibleName():
             if isinstance(w, QComboBox):
-                w.currentIndexChanged.connect(lambda: widget_value_changed(self))
+                w.currentIndexChanged.connect(partial(widget_value_changed, self, w))
             elif isinstance(w, QSpinBox) or isinstance(w, QDoubleSpinBox):
-                w.valueChanged.connect(lambda: widget_value_changed(self))
+                w.valueChanged.connect(partial(widget_value_changed, self, w))
             elif isinstance(w, QCheckBox):
-                w.clicked.connect(lambda: widget_value_changed(self))
+                w.clicked.connect(partial(widget_value_changed, self, w))
             else:
                 raise
         else:
             raise
 
 
-def widget_value_changed(self):
+def widget_value_changed(self, widget, *args):
     """
     update raspberry_info dictionary when widget value changed
     """
 
-    if self.current_raspberry_id:
-        if isinstance(self.sender(), QComboBox):
-            self.raspberry_info[self.current_raspberry_id][
-                self.sender().accessibleName()
-            ] = self.sender().currentText()
-        if isinstance(self.sender(), QSpinBox):
-            self.raspberry_info[self.current_raspberry_id][
-                self.sender().accessibleName()
-            ] = self.sender().value()
-        if isinstance(self.sender(), QCheckBox):
-            self.raspberry_info[self.current_raspberry_id][
-                self.sender().accessibleName()
-            ] = self.sender().isChecked()
+    if not self.current_raspberry_id:
+        return
 
-        # pprint.pprint(self.raspberry_info[self.current_raspberry_id])
+    key = widget.accessibleName()
+    info = self.raspberry_info[self.current_raspberry_id]
+
+    if isinstance(widget, QComboBox):
+        info[key] = widget.currentText()
+    if isinstance(widget, (QSpinBox, QDoubleSpinBox)):
+        info[key] = widget.value()
+    if isinstance(widget, QCheckBox):
+        info[key] = widget.isChecked()
 
 
 def update_rpi_settings(self, raspberry_id):
@@ -86,7 +84,7 @@ def update_rpi_settings(self, raspberry_id):
         if w.accessibleName():
             if isinstance(w, QComboBox):
                 w.setCurrentText(self.raspberry_info[raspberry_id][w.accessibleName()])
-            elif isinstance(w, QSpinBox) or isinstance(w, QDoubleSpinBox):
+            elif isinstance(w, (QSpinBox, QDoubleSpinBox)):
                 w.setValue(self.raspberry_info[raspberry_id][w.accessibleName()])
             elif isinstance(w, QCheckBox):
                 w.setChecked(self.raspberry_info[raspberry_id][w.accessibleName()])
