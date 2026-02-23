@@ -1627,7 +1627,7 @@ if __name__ == "__main__":
         "-v",
         "--version",
         action="version",
-        version=f"%(prog)s v.{__version__} {__version_date__} (c) Olivier Friard 2021",
+        version=f"%(prog)s v.{__version__} {__version_date__} (c) Olivier Friard 2021-2026",
         help="Display the help",
     )
     args = parser.parse_args()
