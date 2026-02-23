@@ -57,15 +57,7 @@ from PySide6.QtWidgets import (
 
 urllib3.disable_warnings()
 
-try:
-    import config_coordinator_local as cfg
-except Exception:
-    print("file config_coordinator_local.py not found")
-    try:
-        import config_coordinator as cfg
-    except Exception:
-        print("file config_coordinator.py not found")
-        sys.exit()
+import config_coordinator as cfg
 
 logging.basicConfig(
     filename="coordinator.log",
