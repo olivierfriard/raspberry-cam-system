@@ -1545,6 +1545,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         if source_name == "start_time_lapse_pb":
             self.rasp_output_lb.setText("Time lapse requested")
             # app.processEvents()
+            print("start_time_lapse_pb")
             time_lapse.take_picture(self, self.current_raspberry_id, mode="time lapse")
 
     @verif

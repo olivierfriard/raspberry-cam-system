@@ -127,6 +127,21 @@ def take_picture(self, raspberry_id: str, mode: str):
 
     # check if time lapse requested
     if mode == "time lapse":
+        response = self.request(raspberry_id, "/take_picture", type="POST", data=data)
+        if response.status_code != 200:
+            self.rasp_output_lb.setText(
+                f"Error taking picture (status code: {response.status_code})"
+            )
+            return
+
+        if response.json().get("error", True):
+            self.rasp_output_lb.setText(
+                f"{response.json().get('msg', 'Undefined error')}  returncode: {response.json().get('error', '-')}"
+            )
+            return
+
+        self.rasp_output_lb.setText(response.json().get("msg", "Undefined error"))
+
         # rpicam-still -o image%05d.jpg --timelapse 30000 -t 3600000
         self.get_raspberry_status(raspberry_id)
         self.update_raspberry_display(raspberry_id)

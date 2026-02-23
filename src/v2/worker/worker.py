@@ -1069,7 +1069,7 @@ def take_picture():
                 ),
             ]
         )
-        logging.info(f"command: {' '.join(command_line)}")
+        logging.info(f"time lapse command: {' '.join(command_line)}")
         try:
             subprocess.Popen(command_line)
         except Exception:
@@ -1106,7 +1106,7 @@ def take_picture():
                 ]
             )
 
-        logging.info("command:" + (" ".join(command_line)))
+        logging.info("one picture command:" + (" ".join(command_line)))
 
         try:
             completed = subprocess.run(command_line)
