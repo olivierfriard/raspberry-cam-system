@@ -3,7 +3,7 @@ Raspberry Cam System
 
 Configuration of Worker on Raspberry Pi
 
-(c) 2021-2023 Olivier Friard
+(c) 2021-2026 Olivier Friard
 """
 
 PORT = 5000

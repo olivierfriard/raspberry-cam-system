@@ -1383,7 +1383,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             return
 
         for raspberry_id in self.raspberry_ip:
-            self.shutdown(self, raspberry_id)
+            self.shutdown(raspberry_id)
 
     def blink(self):
         """
