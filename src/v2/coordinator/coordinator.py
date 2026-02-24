@@ -9,7 +9,7 @@ TODO:
 
 """
 
-__version__ = "22"
+__version__ = "35"
 __version_date__ = "2026-02-23"
 
 import argparse

@@ -8,6 +8,15 @@ cd raspberry-cam-system
 uv sync
 
 
+# connect Raspberry Pi to switch
+
+sudo nmcli connection modify "Wired connection 1" \
+  ipv4.method manual \
+  ipv4.addresses 192.168.10.10/24 \
+  ipv4.gateway "" \
+  ipv4.dns ""
+
+
 
 # Create a hotspot on the raspberry
 
