@@ -5,11 +5,9 @@ After=network.target
 [Service]
 User=pi
 Group=pi
-WorkingDirectory=/home/pi/worker
-Environment="PATH=/home/pi/worker_venv/bin:/usr/bin:/usr/sbin/:/bin"
-ExecStart=/home/pi/worker_venv/bin/python3 worker.py
+WorkingDirectory=/home/pi/raspberry-cam-system
+Environment="PATH=/home/pi/raspberry-cam-system/.venv/bin:/usr/bin:/usr/sbin/:/bin"
+ExecStart=/home/pi/raspberry-cam-system/.venv/bin/python worker.py
 
 [Install]
 WantedBy=multi-user.target
-
-

@@ -12,6 +12,7 @@ import time
 
 import config_coordinator as cfg
 import requests
+from crontab import CronTab
 from PySide6.QtCore import QObject, Qt, QThread, Signal, Slot
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QMessageBox, QTableWidgetItem
@@ -21,145 +22,205 @@ def datetime_now_iso():
     return datetime.datetime.now().replace(microsecond=0).isoformat().replace("T", " ")
 
 
-def take_picture(self, raspberry_id: str, mode: str):
+def delete_live_pictures(self, raspberry_id):
     """
-    start time lapse or take a picture and display it
+    ask to delete the live pictures from current raspberry pi
     """
 
-    if raspberry_id not in self.raspberry_ip:
+    logging.info(f"Ask to delete the live pictures from Raspberry Pi {raspberry_id}")
+
+    response = self.request(raspberry_id, "/delete_live_pictures")
+    if response == None:
         return
-
-    if self.raspberry_info[raspberry_id]["status"]["status"] != "OK":
-        return
-
-    width, height = self.raspberry_info[raspberry_id]["picture resolution"].split("x")
-    data = {
-        "key": self.security_key,
-        "width": width,
-        "height": height,
-        "rotation": self.raspberry_info[raspberry_id]["picture rotation"],
-        "hflip": self.raspberry_info[raspberry_id]["picture hflip"],
-        "vflip": self.raspberry_info[raspberry_id]["picture vflip"],
-        "timelapse": self.raspberry_info[raspberry_id]["time lapse wait"]
-        if mode == "time lapse"
-        else 0,
-        "timeout": self.raspberry_info[raspberry_id]["time lapse duration"]
-        if mode == "time lapse"
-        else 0,
-        "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
-    }
-
-    if self.cb_enable_picture_parameters.isChecked():
-        data["brightness"] = self.raspberry_info[raspberry_id]["picture brightness"]
-        data["contrast"] = self.raspberry_info[raspberry_id]["picture contrast"]
-        data["saturation"] = self.raspberry_info[raspberry_id]["picture saturation"]
-        data["sharpness"] = self.raspberry_info[raspberry_id]["picture sharpness"]
-        data["gain"] = self.raspberry_info[raspberry_id]["picture gain"]
-
-        # "ISO": self.raspberry_info[raspberry_id]['picture iso'],
-
-    # add file name based on epoch
-    if mode == "one":
-        data["file_name"] = f"{str(int(time.time()))}.jpg"
-
-        response = self.request(raspberry_id, "/take_picture", type="POST", data=data)
-
-        if response.status_code != 200:
-            self.rasp_output_lb.setText(
-                f"Error taking picture (status code: {response.status_code})"
-            )
-            return
-
-        if response.json().get("error", True):
-            self.rasp_output_lb.setText(
-                f"{response.json().get('msg', 'Undefined error')}  returncode: {response.json().get('error', '-')}"
-            )
-            return
-
-        self.rasp_output_lb.setText(response.json().get("msg", "Undefined error"))
-        # app.processEvents()
-
-        try:
-            response2 = requests.get(
-                f"{cfg.PROTOCOL}{self.raspberry_ip[raspberry_id]}{cfg.SERVER_PORT}/static/live_pictures/{data['file_name']}",
-                stream=True,
-                verify=False,
-            )
-
-        except Exception:
-            self.rasp_output_lb.setText(
-                f"Error contacting the Raspberry Pi {raspberry_id}"
-            )
-            return
-
-        if response2.status_code != 200:
-            self.rasp_output_lb.setText(
-                f"Error retrieving the picture. Server status code: {response.status_code}"
-            )
-            return
-
-        with open(f"live_{raspberry_id}.jpg", "wb") as f:
-            response2.raw.decode_content = True
-            shutil.copyfileobj(response2.raw, f)
-
-        self.tw_picture.setCurrentIndex(2)
-        self.picture_lb.setPixmap(
-            QPixmap(f"live_{raspberry_id}.jpg").scaled(
-                self.picture_lb.size(), Qt.AspectRatioMode.KeepAspectRatio
-            )
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error deleting the live pictures (status code: {response.status_code})"
         )
-        self.rasp_output_lb.setText(f"Picture received at {datetime_now_iso()}")
-
-        self.get_raspberry_status(raspberry_id)
-        self.update_raspberry_display(raspberry_id)
-        self.update_raspberry_dashboard(raspberry_id)
-
-    # check if time lapse requested
-    if mode == "time lapse":
-        response = self.request(raspberry_id, "/take_picture", type="POST", data=data)
-        if response.status_code != 200:
-            self.rasp_output_lb.setText(
-                f"Error taking picture (status code: {response.status_code})"
-            )
-            return
-
-        if response.json().get("error", True):
-            self.rasp_output_lb.setText(
-                f"{response.json().get('msg', 'Undefined error')}  returncode: {response.json().get('error', '-')}"
-            )
-            return
-
-        self.rasp_output_lb.setText(response.json().get("msg", "Undefined error"))
-
-        # rpicam-still -o image%05d.jpg --timelapse 30000 -t 3600000
-        self.get_raspberry_status(raspberry_id)
-        self.update_raspberry_display(raspberry_id)
-        self.update_raspberry_dashboard(raspberry_id)
         return
 
+    self.rasp_output_lb.setText(response.json().get("msg", ""))
 
-def stop_time_lapse(self, raspberry_id):
-    """
-    Stop the time lapse
-    """
-    if raspberry_id not in self.raspberry_ip:
-        return
 
-    response = self.request(raspberry_id, "/stop_time_lapse")
-    if response is None:
+def delete_time_lapse_schedule(self, raspberry_id):
+    """
+    delete all time lapse schedule
+    """
+
+    response = self.request(raspberry_id, f"/delete_time_lapse_schedule")
+    if response == None:
         return
 
     if response.status_code != 200:
         self.rasp_output_lb.setText(
-            f"Error trying to stop time lapse (status code: {response.status_code})"
+            f"Error during deletion of the time lapse scheduling (status code: {response.status_code})"
         )
         return
     self.rasp_output_lb.setText(
-        response.json().get("msg", "Error during stopping time lapse")
+        response.json().get("msg", "Error during deletion of the time lapse scheduling")
     )
-    self.get_raspberry_status(raspberry_id)
-    self.update_raspberry_display(raspberry_id)
-    self.update_raspberry_dashboard(raspberry_id)
+
+    self.view_time_lapse_schedule_clicked()
+
+
+def delete_timelapse_pictures(self, raspberry_id):
+    """
+    ask to delete the time lapse pictures from current raspberry pi
+    """
+
+    logging.info(
+        f"Ask to delete the time lapse pictures from Raspberry Pi {raspberry_id}"
+    )
+
+    response = self.request(raspberry_id, "/delete_timelapse_pictures")
+    if response == None:
+        return
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error deleting the time lapse pictures (status code: {response.status_code})"
+        )
+        return
+
+    self.rasp_output_lb.setText(response.json().get("msg", ""))
+
+
+def download_live_pictures(self, raspberry_id, download_dir):
+    """
+    Download the live pictures from Raspberry Pi
+    """
+
+    def thread_progress(output):
+        self.rasp_output_lb.setText(output)
+
+    def thread_finished(downloaded_pictures_list):
+        self.rasp_output_lb.setText(
+            f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
+        )
+        self.video_list_clicked()
+        self.pict_download_thread.quit
+
+    remote_pictures_list = get_live_pictures_list(self, raspberry_id)
+    if len(remote_pictures_list) == 0:
+        self.rasp_output_lb.setText(f"No pictures to download")
+        return
+
+    # get pictures archive directory
+    response = self.request(raspberry_id, "/live_pictures_archive_dir")
+    if response is None:
+        return
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error requiring the live pictures archive directory (status code: {response.status_code})"
+        )
+        return
+    if response.json().get("error", True):
+        self.rasp_output_lb.setText("Error requiring the pictures archive directory")
+        return
+    remote_pictures_archive_dir = response.json().get("msg", "")
+
+    logging.info(f"Remote live pictures directory: {remote_pictures_archive_dir}")
+
+    self.pict_download_thread = QThread(parent=self)
+    self.pict_download_thread.start()
+    self.pict_download_worker = Download_pict_worker(self.raspberry_ip)
+    self.pict_download_worker.moveToThread(self.pict_download_thread)
+
+    self.pict_download_worker.start.connect(self.pict_download_worker.run)
+    self.pict_download_worker.progress.connect(thread_progress)
+    self.pict_download_worker.finished.connect(thread_finished)
+    self.pict_download_worker.start.emit(
+        raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
+    )
+
+
+def download_timelapse_pictures(self, raspberry_id, download_dir):
+    """
+    Download the time lapse pictures from Raspberry Pi
+    """
+
+    def thread_progress(output):
+        self.rasp_output_lb.setText(output)
+
+    def thread_finished(downloaded_pictures_list):
+        self.pict_download_thread.quit()
+        self.rasp_output_lb.setText(
+            f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
+        )
+        self.video_list_clicked()
+
+    remote_pictures_list = get_timelapse_pictures_list(self, raspberry_id)
+    if len(remote_pictures_list) == 0:
+        self.rasp_output_lb.setText(f"No pictures to download")
+        return
+
+    # get pictures archive directory
+    response = self.request(raspberry_id, "/timelapse_pictures_archive_dir")
+    if response == None:
+        return
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error requiring the pictures archive directory (status code: {response.status_code})"
+        )
+        return
+    if response.json().get("error", True):
+        self.rasp_output_lb.setText(
+            f"Error requiring the time lapse pictures archive directory"
+        )
+        return
+    remote_pictures_archive_dir = response.json().get("msg", "")
+
+    self.pict_download_thread = QThread(parent=self)
+    self.pict_download_thread.start()
+    self.pict_download_worker = Download_pict_worker(self.raspberry_ip)
+    self.pict_download_worker.moveToThread(self.pict_download_thread)
+
+    self.pict_download_worker.start.connect(self.pict_download_worker.run)
+    # self.pict_download_worker.progress.connect(thread_progress)
+    # self.pict_download_worker.finished.connect(thread_finished)
+    self.pict_download_worker.start.emit(
+        raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
+    )
+
+
+def get_live_pictures_list(self, raspberry_id):
+    """
+    request the list of live pictures to Raspberry Pi
+    """
+
+    response = self.request(raspberry_id, "/live_pictures_list")
+    if response == None:
+        return
+
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error requiring the list of live pictures (status code: {response.status_code})"
+        )
+        return
+    if "pictures_list" not in response.json():
+        self.rasp_output_lb.setText(f"Error requiring the list of live pictures")
+        return
+
+    return sorted(list(response.json()["pictures_list"]))
+
+
+def get_timelapse_pictures_list(self, raspberry_id):
+    """
+    request the list of recorded pictures to Raspberry Pi
+    """
+
+    response = self.request(raspberry_id, "/timelapse_pictures_list")
+    if response == None:
+        return
+
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error requiring the list of time lapse pictures (status code: {response.status_code})"
+        )
+        return
+    if "pictures_list" not in response.json():
+        self.rasp_output_lb.setText(f"Error requiring the list of time lapse pictures")
+        return
+
+    return sorted(list(response.json()["pictures_list"]))
 
 
 def schedule_time_lapse(self, raspberry_id):
@@ -211,6 +272,39 @@ def schedule_time_lapse(self, raspberry_id):
     # job = cron.new(command='test')
     # job.setall('min hour DOM month DOW')
 
+    minutes = self.picture_minutes_le.text().strip()
+    hours = self.picture_hours_le.text().strip()
+    dom = self.picture_days_of_month_le.text().strip()
+    month = self.picture_months_le.text().strip()
+    dow = self.picture_days_of_week_le.text().replace(" ", "")
+
+    cron = CronTab(tab="")
+    job = cron.new(command="echo test")
+    crontab_event = f"{minutes} {hours} {dom} {month} {dow}"
+    try:
+        job.setall(crontab_event)
+    except Exception as e:
+        QMessageBox.warning(
+            None,
+            "Raspberry Pi coordinator",
+            (
+                f"{e}<br>See "
+                "<pre>"
+                "field          allowed values\n"
+                "-----          --------------\n"
+                "minute         0-59\n"
+                "hour           0-23\n"
+                "day of month   1-31\n"
+                "month          1-12 (or names, see below)\n"
+                "day of week    0-7 (0 or 7 is Sunday, or use names)\n"
+                "</pre>"
+            ),
+            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+            QMessageBox.StandardButton.NoButton,
+        )
+        return
+
+    """
     # check hours format
     hours = self.picture_hours_le.text().replace(" ", "")
     if hours == "*":
@@ -334,6 +428,7 @@ def schedule_time_lapse(self, raspberry_id):
         dow_str = ",".join([str(x) for x in int_dow_splt])
 
     crontab_event = f"{minutes_str} {hours_str} {dom_str} {month_str} {dow_str}"
+    """
 
     logging.info(f"crontab event: {crontab_event} for {raspberry_id}")
 
@@ -375,6 +470,147 @@ def schedule_time_lapse(self, raspberry_id):
     self.view_time_lapse_schedule_clicked()
 
 
+def stop_time_lapse(self, raspberry_id):
+    """
+    Stop the time lapse
+    """
+    if raspberry_id not in self.raspberry_ip:
+        return
+
+    response = self.request(raspberry_id, "/stop_time_lapse")
+    if response is None:
+        return
+
+    if response.status_code != 200:
+        self.rasp_output_lb.setText(
+            f"Error trying to stop time lapse (status code: {response.status_code})"
+        )
+        return
+    self.rasp_output_lb.setText(
+        response.json().get("msg", "Error during stopping time lapse")
+    )
+    self.get_raspberry_status(raspberry_id)
+    self.update_raspberry_display(raspberry_id)
+    self.update_raspberry_dashboard(raspberry_id)
+
+
+def take_picture(self, raspberry_id: str, mode: str):
+    """
+    start time lapse or take a picture and display it
+    """
+
+    if raspberry_id not in self.raspberry_ip:
+        return
+
+    if self.raspberry_info[raspberry_id]["status"]["status"] != "OK":
+        return
+
+    width, height = self.raspberry_info[raspberry_id]["picture resolution"].split("x")
+    data = {
+        "key": self.security_key,
+        "width": width,
+        "height": height,
+        "rotation": self.raspberry_info[raspberry_id]["picture rotation"],
+        "hflip": self.raspberry_info[raspberry_id]["picture hflip"],
+        "vflip": self.raspberry_info[raspberry_id]["picture vflip"],
+        "timelapse": self.raspberry_info[raspberry_id]["time lapse wait"]
+        if mode == "time lapse"
+        else 0,
+        "timeout": self.raspberry_info[raspberry_id]["time lapse duration"]
+        if mode == "time lapse"
+        else 0,
+        "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
+    }
+
+    if self.cb_enable_picture_parameters.isChecked():
+        data["brightness"] = self.raspberry_info[raspberry_id]["picture brightness"]
+        data["contrast"] = self.raspberry_info[raspberry_id]["picture contrast"]
+        data["saturation"] = self.raspberry_info[raspberry_id]["picture saturation"]
+        data["sharpness"] = self.raspberry_info[raspberry_id]["picture sharpness"]
+        data["gain"] = self.raspberry_info[raspberry_id]["picture gain"]
+
+        # "ISO": self.raspberry_info[raspberry_id]['picture iso'],
+
+    # add file name based on epoch
+    if mode == "one":
+        data["file_name"] = f"{str(int(time.time()))}.jpg"
+
+        response = self.request(raspberry_id, "/take_picture", type="POST", data=data)
+
+        if response.status_code != 200:
+            self.rasp_output_lb.setText(
+                f"Error taking picture (status code: {response.status_code})"
+            )
+            return
+
+        if response.json().get("error", True):
+            self.rasp_output_lb.setText(
+                f"{response.json().get('msg', 'Undefined error')}  returncode: {response.json().get('error', '-')}"
+            )
+            return
+
+        self.rasp_output_lb.setText(response.json().get("msg", "Undefined error"))
+        # app.processEvents()
+
+        try:
+            response2 = requests.get(
+                f"{cfg.PROTOCOL}{self.raspberry_ip[raspberry_id]}{cfg.SERVER_PORT}/static/live_pictures/{data['file_name']}",
+                stream=True,
+                verify=False,
+            )
+
+        except Exception:
+            self.rasp_output_lb.setText(
+                f"Error contacting the Raspberry Pi {raspberry_id}"
+            )
+            return
+
+        if response2.status_code != 200:
+            self.rasp_output_lb.setText(
+                f"Error retrieving the picture. Server status code: {response.status_code}"
+            )
+            return
+
+        with open(f"live_{raspberry_id}.jpg", "wb") as f:
+            response2.raw.decode_content = True
+            shutil.copyfileobj(response2.raw, f)
+
+        self.tw_picture.setCurrentIndex(2)
+        self.picture_lb.setPixmap(
+            QPixmap(f"live_{raspberry_id}.jpg").scaled(
+                self.picture_lb.size(), Qt.AspectRatioMode.KeepAspectRatio
+            )
+        )
+        self.rasp_output_lb.setText(f"Picture received at {datetime_now_iso()}")
+
+        self.get_raspberry_status(raspberry_id)
+        self.update_raspberry_display(raspberry_id)
+        self.update_raspberry_dashboard(raspberry_id)
+
+    # check if time lapse requested
+    if mode == "time lapse":
+        response = self.request(raspberry_id, "/take_picture", type="POST", data=data)
+        if response.status_code != 200:
+            self.rasp_output_lb.setText(
+                f"Error taking picture (status code: {response.status_code})"
+            )
+            return
+
+        if response.json().get("error", True):
+            self.rasp_output_lb.setText(
+                f"{response.json().get('msg', 'Undefined error')}  returncode: {response.json().get('error', '-')}"
+            )
+            return
+
+        self.rasp_output_lb.setText(response.json().get("msg", "Undefined error"))
+
+        # rpicam-still -o image%05d.jpg --timelapse 30000 -t 3600000
+        self.get_raspberry_status(raspberry_id)
+        self.update_raspberry_display(raspberry_id)
+        self.update_raspberry_dashboard(raspberry_id)
+        return
+
+
 def view_time_lapse_schedule(self, raspberry_id):
     """
     view time lapse schedule on Raspberry Pi
@@ -399,69 +635,6 @@ def view_time_lapse_schedule(self, raspberry_id):
             self.time_lapse_schedule_table.setItem(i, j, QTableWidgetItem(tokens[j]))
 
     self.time_lapse_schedule_table.resizeColumnsToContents()
-
-
-def delete_time_lapse_schedule(self, raspberry_id):
-    """
-    delete all time lapse schedule
-    """
-
-    response = self.request(raspberry_id, f"/delete_time_lapse_schedule")
-    if response == None:
-        return
-
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error during deletion of the time lapse scheduling (status code: {response.status_code})"
-        )
-        return
-    self.rasp_output_lb.setText(
-        response.json().get("msg", "Error during deletion of the time lapse scheduling")
-    )
-
-    self.view_time_lapse_schedule_clicked()
-
-
-def get_timelapse_pictures_list(self, raspberry_id):
-    """
-    request the list of recorded pictures to Raspberry Pi
-    """
-
-    response = self.request(raspberry_id, "/timelapse_pictures_list")
-    if response == None:
-        return
-
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error requiring the list of time lapse pictures (status code: {response.status_code})"
-        )
-        return
-    if "pictures_list" not in response.json():
-        self.rasp_output_lb.setText(f"Error requiring the list of time lapse pictures")
-        return
-
-    return sorted(list(response.json()["pictures_list"]))
-
-
-def get_live_pictures_list(self, raspberry_id):
-    """
-    request the list of live pictures to Raspberry Pi
-    """
-
-    response = self.request(raspberry_id, "/live_pictures_list")
-    if response == None:
-        return
-
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error requiring the list of live pictures (status code: {response.status_code})"
-        )
-        return
-    if "pictures_list" not in response.json():
-        self.rasp_output_lb.setText(f"Error requiring the list of live pictures")
-        return
-
-    return sorted(list(response.json()["pictures_list"]))
 
 
 class Download_pict_worker(QObject):
@@ -507,141 +680,3 @@ class Download_pict_worker(QObject):
             self.progress.emit(f"{count}/{len(pictures_list)} pictures downloaded")
 
         self.finished.emit(downloaded_pictures)
-
-
-def download_timelapse_pictures(self, raspberry_id, download_dir):
-    """
-    Download the time lapse pictures from Raspberry Pi
-    """
-
-    def thread_progress(output):
-        self.rasp_output_lb.setText(output)
-
-    def thread_finished(downloaded_pictures_list):
-        self.pict_download_thread.quit()
-        self.rasp_output_lb.setText(
-            f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
-        )
-        self.video_list_clicked()
-
-    remote_pictures_list = get_timelapse_pictures_list(self, raspberry_id)
-    if len(remote_pictures_list) == 0:
-        self.rasp_output_lb.setText(f"No pictures to download")
-        return
-
-    # get pictures archive directory
-    response = self.request(raspberry_id, "/timelapse_pictures_archive_dir")
-    if response == None:
-        return
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error requiring the pictures archive directory (status code: {response.status_code})"
-        )
-        return
-    if response.json().get("error", True):
-        self.rasp_output_lb.setText(
-            f"Error requiring the time lapse pictures archive directory"
-        )
-        return
-    remote_pictures_archive_dir = response.json().get("msg", "")
-
-    self.pict_download_thread = QThread(parent=self)
-    self.pict_download_thread.start()
-    self.pict_download_worker = Download_pict_worker(self.raspberry_ip)
-    self.pict_download_worker.moveToThread(self.pict_download_thread)
-
-    self.pict_download_worker.start.connect(self.pict_download_worker.run)
-    # self.pict_download_worker.progress.connect(thread_progress)
-    # self.pict_download_worker.finished.connect(thread_finished)
-    self.pict_download_worker.start.emit(
-        raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
-    )
-
-
-def download_live_pictures(self, raspberry_id, download_dir):
-    """
-    Download the live pictures from Raspberry Pi
-    """
-
-    def thread_progress(output):
-        self.rasp_output_lb.setText(output)
-
-    def thread_finished(downloaded_pictures_list):
-        self.rasp_output_lb.setText(
-            f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
-        )
-        self.video_list_clicked()
-        self.pict_download_thread.quit
-
-    remote_pictures_list = get_live_pictures_list(self, raspberry_id)
-    if len(remote_pictures_list) == 0:
-        self.rasp_output_lb.setText(f"No pictures to download")
-        return
-
-    # get pictures archive directory
-    response = self.request(raspberry_id, "/live_pictures_archive_dir")
-    if response is None:
-        return
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error requiring the live pictures archive directory (status code: {response.status_code})"
-        )
-        return
-    if response.json().get("error", True):
-        self.rasp_output_lb.setText("Error requiring the pictures archive directory")
-        return
-    remote_pictures_archive_dir = response.json().get("msg", "")
-
-    logging.info(f"Remote live pictures directory: {remote_pictures_archive_dir}")
-
-    self.pict_download_thread = QThread(parent=self)
-    self.pict_download_thread.start()
-    self.pict_download_worker = Download_pict_worker(self.raspberry_ip)
-    self.pict_download_worker.moveToThread(self.pict_download_thread)
-
-    self.pict_download_worker.start.connect(self.pict_download_worker.run)
-    self.pict_download_worker.progress.connect(thread_progress)
-    self.pict_download_worker.finished.connect(thread_finished)
-    self.pict_download_worker.start.emit(
-        raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
-    )
-
-
-def delete_live_pictures(self, raspberry_id):
-    """
-    ask to delete the live pictures from current raspberry pi
-    """
-
-    logging.info(f"Ask to delete the live pictures from Raspberry Pi {raspberry_id}")
-
-    response = self.request(raspberry_id, "/delete_live_pictures")
-    if response == None:
-        return
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error deleting the live pictures (status code: {response.status_code})"
-        )
-        return
-
-    self.rasp_output_lb.setText(response.json().get("msg", ""))
-
-
-def delete_timelapse_pictures(self, raspberry_id):
-    """
-    ask to delete the time lapse pictures from current raspberry pi
-    """
-
-    logging.info(
-        f"Ask to delete the time lapse pictures from Raspberry Pi {raspberry_id}"
-    )
-
-    response = self.request(raspberry_id, "/delete_timelapse_pictures")
-    if response == None:
-        return
-    if response.status_code != 200:
-        self.rasp_output_lb.setText(
-            f"Error deleting the time lapse pictures (status code: {response.status_code})"
-        )
-        return
-
-    self.rasp_output_lb.setText(response.json().get("msg", ""))
