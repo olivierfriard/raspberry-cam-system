@@ -1,0 +1,29 @@
+# Create a hotspot on the raspberry
+
+sudo raspi-config
+-> Localisation Options → WLAN Country
+-> IT
+
+sudo nmcli connection add \
+  type wifi \
+  ifname wlan0 \
+  con-name raspberry_hotspot \
+  autoconnect yes \
+  ssid raspberry_hotspot \
+  802-11-wireless.mode ap \
+  ipv4.method shared \
+  802-11-wireless-security.key-mgmt wpa-psk \
+  802-11-wireless-security.psk PASSWORD
+
+sudo nmcli connection up raspberry_hotspot
+
+
+# connect to raspberry hptspot
+
+sudo raspi-config
+-> Localisation Options → WLAN Country
+-> IT
+
+sudo nmcli device wifi connect raspb15_hotspot password raspberry123
+
+(sudo nmcli device wifi list)
