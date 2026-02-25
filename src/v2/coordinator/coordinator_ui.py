@@ -83,53 +83,75 @@ class Ui_MainWindow(object):
         self.main_tw.setObjectName(u"main_tw")
         self.rasp_list_tab = QWidget()
         self.rasp_list_tab.setObjectName(u"rasp_list_tab")
-        self.horizontalLayout_3 = QHBoxLayout(self.rasp_list_tab)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_29 = QHBoxLayout(self.rasp_list_tab)
+        self.horizontalLayout_29.setObjectName(u"horizontalLayout_29")
         self.splitter = QSplitter(self.rasp_list_tab)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Orientation.Horizontal)
-        self.layoutWidget = QWidget(self.splitter)
-        self.layoutWidget.setObjectName(u"layoutWidget")
-        self.verticalLayout = QVBoxLayout(self.layoutWidget)
+        self.widget = QWidget(self.splitter)
+        self.widget.setObjectName(u"widget")
+        self.verticalLayout = QVBoxLayout(self.widget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.pb_scan_network = QPushButton(self.layoutWidget)
+        self.pb_scan_network = QPushButton(self.widget)
         self.pb_scan_network.setObjectName(u"pb_scan_network")
 
         self.horizontalLayout.addWidget(self.pb_scan_network)
 
-        self.pb_up = QPushButton(self.layoutWidget)
-        self.pb_up.setObjectName(u"pb_up")
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout.addWidget(self.pb_up)
-
-        self.pb_down = QPushButton(self.layoutWidget)
-        self.pb_down.setObjectName(u"pb_down")
-
-        self.horizontalLayout.addWidget(self.pb_down)
+        self.horizontalLayout.addItem(self.horizontalSpacer_8)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.rpi_list = QListWidget(self.layoutWidget)
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.pb_up = QPushButton(self.widget)
+        self.pb_up.setObjectName(u"pb_up")
+
+        self.horizontalLayout_3.addWidget(self.pb_up)
+
+        self.horizontalSpacer_23 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_23)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
+
+        self.horizontalLayout_17 = QHBoxLayout()
+        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
+        self.pb_down = QPushButton(self.widget)
+        self.pb_down.setObjectName(u"pb_down")
+
+        self.horizontalLayout_17.addWidget(self.pb_down)
+
+        self.horizontalSpacer_25 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_17.addItem(self.horizontalSpacer_25)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_17)
+
+        self.rpi_list = QListWidget(self.widget)
         self.rpi_list.setObjectName(u"rpi_list")
 
         self.verticalLayout.addWidget(self.rpi_list)
 
-        self.message_box = QLineEdit(self.layoutWidget)
+        self.message_box = QLineEdit(self.widget)
         self.message_box.setObjectName(u"message_box")
 
         self.verticalLayout.addWidget(self.message_box)
 
-        self.splitter.addWidget(self.layoutWidget)
-        self.layoutWidget1 = QWidget(self.splitter)
-        self.layoutWidget1.setObjectName(u"layoutWidget1")
-        self.verticalLayout_3 = QVBoxLayout(self.layoutWidget1)
+        self.splitter.addWidget(self.widget)
+        self.widget1 = QWidget(self.splitter)
+        self.widget1.setObjectName(u"widget1")
+        self.verticalLayout_3 = QVBoxLayout(self.widget1)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.raspberry_id_lb = QLabel(self.layoutWidget1)
+        self.raspberry_id_lb = QLabel(self.widget1)
         self.raspberry_id_lb.setObjectName(u"raspberry_id_lb")
         font1 = QFont()
         font1.setPointSize(13)
@@ -138,7 +160,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.raspberry_id_lb)
 
-        self.rpi_tw = QTabWidget(self.layoutWidget1)
+        self.rpi_tw = QTabWidget(self.widget1)
         self.rpi_tw.setObjectName(u"rpi_tw")
         self.rpi_tw.setEnabled(False)
         self.status_tab = QWidget()
@@ -1249,7 +1271,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.rpi_tw)
 
-        self.rasp_output_lb = QLabel(self.layoutWidget1)
+        self.rasp_output_lb = QLabel(self.widget1)
         self.rasp_output_lb.setObjectName(u"rasp_output_lb")
         font2 = QFont()
         font2.setPointSize(12)
@@ -1258,9 +1280,9 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.rasp_output_lb)
 
-        self.splitter.addWidget(self.layoutWidget1)
+        self.splitter.addWidget(self.widget1)
 
-        self.horizontalLayout_3.addWidget(self.splitter)
+        self.horizontalLayout_29.addWidget(self.splitter)
 
         self.main_tw.addTab(self.rasp_list_tab, "")
         self.dashboard_tab = QWidget()
