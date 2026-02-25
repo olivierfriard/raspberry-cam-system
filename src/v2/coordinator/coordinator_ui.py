@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'coordinator.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.2
+## Created by: Qt User Interface Compiler version 6.9.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -40,6 +40,8 @@ class Ui_MainWindow(object):
         self.actionShow_IP_address.setObjectName(u"actionShow_IP_address")
         self.action_convert_h264_video_files = QAction(MainWindow)
         self.action_convert_h264_video_files.setObjectName(u"action_convert_h264_video_files")
+        self.actionEdit_parameters = QAction(MainWindow)
+        self.actionEdit_parameters.setObjectName(u"actionEdit_parameters")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
@@ -85,7 +87,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.splitter = QSplitter(self.rasp_list_tab)
         self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Horizontal)
+        self.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.layoutWidget = QWidget(self.splitter)
         self.layoutWidget.setObjectName(u"layoutWidget")
         self.verticalLayout = QVBoxLayout(self.layoutWidget)
@@ -331,7 +333,7 @@ class Ui_MainWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1103, 455))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 1387, 485))
         self.verticalLayout_23 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_23.setObjectName(u"verticalLayout_23")
         self.groupBox_5 = QGroupBox(self.scrollAreaWidgetContents_2)
@@ -634,8 +636,8 @@ class Ui_MainWindow(object):
         sizePolicy1.setHeightForWidth(self.time_lapse_schedule_table.sizePolicy().hasHeightForWidth())
         self.time_lapse_schedule_table.setSizePolicy(sizePolicy1)
         self.time_lapse_schedule_table.setMaximumSize(QSize(16777215, 16777215))
-        self.time_lapse_schedule_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.time_lapse_schedule_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.time_lapse_schedule_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.time_lapse_schedule_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         self.verticalLayout_19.addWidget(self.time_lapse_schedule_table)
 
@@ -815,7 +817,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 606, 845))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 739, 871))
         self.verticalLayout_22 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_22.setObjectName(u"verticalLayout_22")
         self.groupBox_3 = QGroupBox(self.scrollAreaWidgetContents)
@@ -1084,8 +1086,8 @@ class Ui_MainWindow(object):
         self.video_rec_schedule_table.setHorizontalHeaderItem(5, __qtablewidgetitem11)
         self.video_rec_schedule_table.setObjectName(u"video_rec_schedule_table")
         self.video_rec_schedule_table.setMinimumSize(QSize(0, 150))
-        self.video_rec_schedule_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.video_rec_schedule_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.video_rec_schedule_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.video_rec_schedule_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
 
         self.verticalLayout_14.addWidget(self.video_rec_schedule_table)
 
@@ -1270,7 +1272,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 2040, 22))
+        self.menubar.setGeometry(QRect(0, 0, 2040, 25))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuTools = QMenu(self.menubar)
@@ -1283,6 +1285,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
         self.menuFile.addAction(self.actionExit)
+        self.menuTools.addAction(self.actionEdit_parameters)
         self.menuTools.addAction(self.actionShow_IP_address)
         self.menuTools.addAction(self.action_convert_h264_video_files)
 
@@ -1306,6 +1309,7 @@ class Ui_MainWindow(object):
 #endif // QT_CONFIG(shortcut)
         self.actionShow_IP_address.setText(QCoreApplication.translate("MainWindow", u"Show IP address for all Raspberries Pi", None))
         self.action_convert_h264_video_files.setText(QCoreApplication.translate("MainWindow", u"Convert h264 video files to MP4", None))
+        self.actionEdit_parameters.setText(QCoreApplication.translate("MainWindow", u"Edit parameters", None))
         self.label_34.setText(QCoreApplication.translate("MainWindow", u"Commands for all detected Raspberry Pi:", None))
         self.get_status_all_pb.setText(QCoreApplication.translate("MainWindow", u"Get status", None))
         self.time_synchro_all_pb.setText(QCoreApplication.translate("MainWindow", u"Synchronize time", None))

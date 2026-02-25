@@ -3,6 +3,9 @@ Raspberry Pi coordinator
 
 """
 
+from pathlib import Path
+
+from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
@@ -25,6 +28,8 @@ class ResultsWidget(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.parameters = False
+
         self.setWindowTitle("")
 
         hbox = QVBoxLayout()
@@ -33,6 +38,10 @@ class ResultsWidget(QWidget):
         hbox.addWidget(self.lb)
 
         self.ptText = QPlainTextEdit()
+        self.ptText.setFont(
+            QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
+        )
+
         hbox.addWidget(self.ptText)
 
         hbox2 = QHBoxLayout()
@@ -55,10 +64,13 @@ class ResultsWidget(QWidget):
         save content of self.ptText
         """
 
-        fn = QFileDialog().getSaveFileName(
-            self, "Save output", "", "Text files (*.txt *.tsv);;All files (*)"
-        )
-        file_name = fn[0] if type(fn) is tuple else fn
+        if self.parameters:
+            file_name = str(Path(__file__).parent / "config_coordinator.py")
+        else:
+            fn = QFileDialog().getSaveFileName(
+                self, "Save output", "", "Text files (*.txt *.tsv);;All files (*)"
+            )
+            file_name = fn[0] if type(fn) is tuple else fn
 
         if file_name:
             try:

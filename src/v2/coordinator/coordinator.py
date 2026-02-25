@@ -16,10 +16,7 @@ import argparse
 import base64
 import datetime
 import logging
-
-# from qt_material import apply_stylesheet
 import os
-import pathlib as pl
 import platform
 import socket
 import struct
@@ -30,6 +27,7 @@ import time
 from functools import partial
 from http import HTTPStatus
 from multiprocessing.pool import ThreadPool
+from pathlib import Path
 
 import connections
 import output_window
@@ -57,10 +55,11 @@ from PySide6.QtWidgets import (
 
 urllib3.disable_warnings()
 
+# TO DO: check if file exists. If not copy from .example and edit it
 import config_coordinator as cfg
 
 logging.basicConfig(
-    filename="coordinator.log",
+    filename=Path(__file__).parent / "coordinator.log",
     filemode="a",
     format="%(asctime)s, %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -198,9 +197,8 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__()
 
-        self.current_raspberry_id = ""
+        self.current_raspberry_id: str = ""
 
-        # super(MainWindow, self).__init__(parent)
         self.setupUi(self)
 
         self.showMaximized()
@@ -210,7 +208,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         self.define_connections()
 
-        self.setWindowTitle("Raspberry Pi coordinator")
+        self.setWindowTitle("Raspberry Cam System - Coordinator module")
         self.statusBar().showMessage(
             f"v. {__version__} - {__version_date__}    WIFI SSID: {get_wifi_ssid()} ({get_wlan_ip_address()})    IP address: {get_ip()}"
         )
@@ -256,6 +254,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.close)
 
         # tools
+        self.actionEdit_parameters.triggered.connect(self.edit_parameters)
         self.actionShow_IP_address.triggered.connect(self.show_ip_list)
         self.action_convert_h264_video_files.triggered.connect(self.convert_h264)
 
@@ -383,7 +382,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         directory_path = QFileDialog.getExistingDirectory(
             self,
             "Select Directory",
-            str(pl.Path.home()),
+            str(Path.home()),
             options=QFileDialog.ShowDirsOnly,
         )
 
@@ -392,7 +391,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         file_count: int = 0
         converted_file_count: int = 0
         new_converted_file_count: int = 0
-        for file_path in pl.Path(directory_path).glob("*.h264"):
+        for file_path in Path(directory_path).glob("*.h264"):
             file_count += 1
             if file_path.with_suffix(".mp4").is_file():
                 converted_file_count += 1
@@ -449,7 +448,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         self.save_settings()
 
     def read_settings(self):
-        iniFilePath = pl.Path.home() / pl.Path(".rpi_coordinator.conf")
+        iniFilePath = Path.home() / Path(".rpi_coordinator.conf")
 
         logging.debug(f"read config file from {iniFilePath}")
 
@@ -458,7 +457,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         return settings.value("rpi_config", {})
 
     def save_settings(self):
-        iniFilePath = pl.Path.home() / pl.Path(".rpi_coordinator.conf")
+        iniFilePath = Path.home() / Path(".rpi_coordinator.conf")
 
         logging.debug(f"save config file in {iniFilePath}")
 
@@ -738,7 +737,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             QFileDialog.getExistingDirectory(
                 self,
                 "Select Directory",
-                str(pl.Path.home()),
+                str(Path.home()),
                 options=QFileDialog.ShowDirsOnly,
             )
         )
@@ -760,7 +759,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             QFileDialog.getExistingDirectory(
                 self,
                 "Select a directory to save the time lapse pictures",
-                str(pl.Path.home()),
+                str(Path.home()),
                 options=QFileDialog.ShowDirsOnly,
             )
         )
@@ -780,7 +779,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             QFileDialog.getExistingDirectory(
                 self,
                 "Select a directory to save the live pictures",
-                str(pl.Path.home()),
+                str(Path.home()),
                 options=QFileDialog.ShowDirsOnly,
             )
         )
@@ -864,7 +863,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             item.setText(video_file_name)
 
             # check if file present in archive
-            if not (pl.Path(cfg.VIDEO_ARCHIVE) / pl.Path(video_file_name)).is_file():
+            if not (Path(cfg.VIDEO_ARCHIVE) / Path(video_file_name)).is_file():
                 font = QFont()
                 font.setBold(True)
                 item.setFont(font)
@@ -1073,6 +1072,29 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             " ".join([f"{self.raspberry_ip[x]}" for x in self.raspberry_ip])
         )
         self.results.show()
+
+    def edit_parameters(self):
+        """
+        edit the configuration file: config_coordinator.py
+        """
+
+        self.w = output_window.ResultsWidget()
+        self.w.setWindowTitle("IP addresses")
+        self.w.ptText.clear()
+        try:
+            with open(Path(__file__).parent / "config_coordinator.py", "r") as f_in:
+                content = f_in.read()
+                self.w.ptText.appendPlainText(content)
+        except Exception as e:
+            QMessageBox.warning(
+                None,
+                "Raspberry Pi coordinator",
+                "Impossible to open the configuration file: config_coordinator.py",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
+            )
+        self.w.parameters = True
+        self.w.show()
 
     def go_left(self):
         pass
