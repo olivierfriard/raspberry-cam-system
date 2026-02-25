@@ -2,4 +2,5 @@ __pycache__
 *.log
 .venv
 src/v2/coordinator/live_raspberrypi.jpg
+src/v2/coordinator/config_coordinator.py
 
