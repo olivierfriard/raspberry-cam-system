@@ -154,14 +154,16 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
     """
 
     def thread_progress(output):
-        self.rasp_output_lb.setText(output)
+        # self.rasp_output_lb.setText(output)
+        pass
 
     def thread_finished(downloaded_pictures_list):
+        print("thread finished")
+        # self.rasp_output_lb.setText(
+        #    f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
+        # )
+        # self.video_list_clicked()
         self.pict_download_thread.quit()
-        self.rasp_output_lb.setText(
-            f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
-        )
-        self.video_list_clicked()
 
     remote_pictures_list = get_timelapse_pictures_list(self, raspberry_id)
     if len(remote_pictures_list) == 0:
