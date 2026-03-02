@@ -1098,7 +1098,7 @@ def take_picture():
                     / pl.Path(cfg.STATIC_DIR)
                     / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
                     / pl.Path(
-                        f'{socket.gethostname()}_$(date -u +"\%Y-\%m-\%d_\%H\%M\%S")'
+                        f'{socket.gethostname()}_$(date -u +"%Y-%m-%d_%H%M%S")'
                     ).with_suffix(".jpg")
                 ),
             ]
