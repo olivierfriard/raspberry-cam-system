@@ -27,7 +27,7 @@ import config as cfg
 from crontab import CronTab  # from python-crontab (not crontab)
 from flask import Flask, Response, request, send_from_directory
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __version_date__ = "2026-03-02"
 
 
@@ -77,12 +77,13 @@ def get_hw_addr(ifname):
         return "Not determined"
 
 
-def get_ip():
+def get_ip() -> str:
     """
     return IP address. Does not need to be connected to internet
     https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
     """
 
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
@@ -93,6 +94,16 @@ def get_ip():
     finally:
         s.close()
     return IP
+    """
+    result = subprocess.run(
+        ["hostname", "-I"], capture_output=True, text=True, check=True
+    )
+
+    ips = result.stdout.strip().split()
+    if ips:
+        return " ".join(ips)
+    else:
+        return "Not connected"
 
 
 def get_timezone():
