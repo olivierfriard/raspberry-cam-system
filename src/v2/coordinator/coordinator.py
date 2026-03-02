@@ -103,12 +103,13 @@ def ping(host):
     )
 
 
-def get_ip():
+def get_ip() -> str:
     """
     return IP address. Does not need to be connected to internet
     https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
     """
 
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # doesn't even have to be reachable
@@ -119,6 +120,16 @@ def get_ip():
     finally:
         s.close()
     return IP
+    """
+    result = subprocess.run(
+        ["hostname", "-I"], capture_output=True, text=True, check=True
+    )
+
+    ips = result.stdout.strip().split()
+    if ips:
+        return " ".join(ips)
+    else:
+        return "Not connected"
 
 
 def get_wlan_ip_address() -> str:
