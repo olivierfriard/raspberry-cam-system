@@ -27,8 +27,8 @@ import config as cfg
 from crontab import CronTab  # from python-crontab (not crontab)
 from flask import Flask, Response, request, send_from_directory
 
-__version__ = "2.0.0"
-__version_date__ = "2026-02-24"
+__version__ = "2.0.1"
+__version_date__ = "2026-03-02"
 
 
 VCGENCMD_PATH = "/usr/bin/vcgencmd"

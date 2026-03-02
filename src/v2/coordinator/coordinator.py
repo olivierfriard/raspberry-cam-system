@@ -9,8 +9,8 @@ TODO:
 
 """
 
-__version__ = "2.0.0"
-__version_date__ = "2026-02-23"
+__version__ = "2.0.1"
+__version_date__ = "2026-03-02"
 
 import argparse
 import base64
