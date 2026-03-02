@@ -110,24 +110,12 @@ rpicam-still --immediate "${args[@]}" -o "$tmpfile"
 # build ISO8601 filename (file-safe: colons replaced by hyphens)
 if [[ "$USE_UTC" -eq 1 ]]; then
   # UTC with trailing Z
-  timestamp="$(date -u +"%Y-%m-%dT%H-%M-%SZ")"
+  timestamp="$(date -u +"%Y-%m-%d_%H-%M-%SZ")"
 else
-  timestamp="$(date +"%Y-%m-%dT%H-%M-%S")"
+  timestamp="$(date +"%Y-%m-%d_%H-%M-%S")"
 fi
 
-# if SAFE=0 and user wants literal colons (not recommended), try to produce with colons
-# NOTE: many filesystems accept ':', but for portability we default to SAFE layout
-if [[ "$SAFE" -eq 0 ]]; then
-  if [[ "$USE_UTC" -eq 1 ]]; then
-    # attempt raw ISO with Z (local systems: keep as-is but replace when not SAFE)
-    timestamp="$(date -u +"%Y-%m-%dT%H:%M:%S")Z"
-  else
-    timestamp="$(date +"%Y-%m-%dT%H:%M:%S")"
-  fi
-  # WARNING: leaving ':' in filenames may be undesirable on some OS.
-fi
-
-outfile="$OUTDIR/img_${timestamp}.jpg"
+outfile="$OUTDIR/${timestamp}.jpg"
 
 # move temp -> final atomically
 mv -- "$tmpfile" "$outfile"
