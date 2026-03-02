@@ -185,16 +185,31 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
     remote_pictures_archive_dir = response.json().get("msg", "")
 
     self.pict_download_thread = QThread(parent=self)
-    self.pict_download_thread.start()
+    # self.pict_download_thread.start()
     self.pict_download_worker = Download_pict_worker(self.raspberry_ip)
     self.pict_download_worker.moveToThread(self.pict_download_thread)
 
-    self.pict_download_worker.start.connect(self.pict_download_worker.run)
-    # self.pict_download_worker.progress.connect(thread_progress)
-    # self.pict_download_worker.finished.connect(thread_finished)
-    self.pict_download_worker.start.emit(
-        raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
+    # self.pict_download_worker.start.connect(self.pict_download_worker.run)
+    self.pict_download_worker.progress.connect(thread_progress)
+    self.pict_download_worker.finished.connect(thread_finished)
+
+    # self.pict_download_worker.start.emit(
+    #    raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
+    #    #)
+    self.pict_download_worker.finished.connect(self.pict_download_thread.quit)
+    self.pict_download_thread.finished.connect(self.pict_download_worker.deleteLater)
+    self.pict_download_thread.finished.connect(self.pict_download_thread.deleteLater)
+
+    self.pict_download_thread.started.connect(
+        partial(
+            self.pict_download_worker.run,
+            raspberry_id,
+            remote_pictures_list,
+            download_dir,
+            remote_pictures_archive_dir,
+        )
     )
+    self.pict_download_thread.start()
 
 
 def get_live_pictures_list(self, raspberry_id):
