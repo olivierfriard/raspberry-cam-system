@@ -89,9 +89,9 @@ echo "Running: rpicam-still ${args[*]} -o $tmpfile"
 rpicam-still --immediate "${args[@]}" -o "$tmpfile"
 
 if [[ "$USE_UTC" -eq 1 ]]; then
-  timestamp="$(date -u +"%Y-%m-%dT%H-%M-%SZ")"
+  timestamp="$(date -u +"%Y-%m-%d_%H-%M-%SZ")"
 else
-  timestamp="$(date +"%Y-%m-%dT%H-%M-%S")"
+  timestamp="$(date +"%Y-%m-%d_%H-%M-%S")"
 fi
 
 outfile="$OUTDIR/${timestamp}.jpg"
