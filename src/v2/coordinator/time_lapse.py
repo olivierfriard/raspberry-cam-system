@@ -30,7 +30,7 @@ def delete_live_pictures(self, raspberry_id):
     logging.info(f"Ask to delete the live pictures from Raspberry Pi {raspberry_id}")
 
     response = self.request(raspberry_id, "/delete_live_pictures")
-    if response == None:
+    if response is None:
         return
     if response.status_code != 200:
         self.rasp_output_lb.setText(
@@ -450,11 +450,13 @@ def schedule_time_lapse(self, raspberry_id):
         # "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
     }
 
+    logging.info(f"data: {data} for {raspberry_id}")
+
     response = self.request(
-        raspberry_id, f"/schedule_time_lapse", type="POST", data=data
+        raspberry_id, "/schedule_time_lapse", type="POST", data=data
     )
 
-    if response == None:
+    if response is None:
         return
 
     if response.status_code != 200:
@@ -616,8 +618,8 @@ def view_time_lapse_schedule(self, raspberry_id):
     view time lapse schedule on Raspberry Pi
     """
 
-    response = self.request(raspberry_id, f"/view_time_lapse_schedule")
-    if response == None:
+    response = self.request(raspberry_id, "/view_time_lapse_schedule")
+    if response is None:
         return
 
     if response.status_code != 200:

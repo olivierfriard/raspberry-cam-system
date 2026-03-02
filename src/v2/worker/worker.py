@@ -533,6 +533,7 @@ def schedule_time_lapse():
     # comment = f"time-lapse for {request.values['timeout']} s (every {request.values['timelapse']} s)"
     comment = "test comment"
 
+    """
     command_line.extend(
         [
             "-o",
@@ -541,6 +542,21 @@ def schedule_time_lapse():
                 / pl.Path(cfg.STATIC_DIR)
                 / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
                 / pl.Path(f"{socket.gethostname()}_%04d").with_suffix(".jpg")
+            ),
+        ]
+    )
+    """
+
+    command_line.extend(
+        [
+            "-o",
+            str(
+                pl.Path(__file__).resolve().parent
+                / pl.Path(cfg.STATIC_DIR)
+                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                / pl.Path(
+                    f'{socket.gethostname()}_$(date -u +"\%Y-\%m-\%d_\%H\%M\%S")'
+                ).with_suffix(".jpg")
             ),
         ]
     )
