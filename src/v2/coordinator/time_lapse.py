@@ -9,6 +9,7 @@ import logging
 import pathlib as pl
 import shutil
 import time
+from functools import partial
 
 import config_coordinator as cfg
 import requests
@@ -96,11 +97,11 @@ def download_live_pictures(self, raspberry_id, download_dir):
             f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
         )
         self.video_list_clicked()
-        self.pict_download_thread.quit
+        self.pict_download_thread.quit()
 
     remote_pictures_list = get_live_pictures_list(self, raspberry_id)
     if len(remote_pictures_list) == 0:
-        self.rasp_output_lb.setText(f"No pictures to download")
+        self.rasp_output_lb.setText("No pictures to download")
         return
 
     # get pictures archive directory
@@ -120,16 +121,31 @@ def download_live_pictures(self, raspberry_id, download_dir):
     logging.info(f"Remote live pictures directory: {remote_pictures_archive_dir}")
 
     self.pict_download_thread = QThread(parent=self)
-    self.pict_download_thread.start()
+    # self.pict_download_thread.start()
     self.pict_download_worker = Download_pict_worker(self.raspberry_ip)
     self.pict_download_worker.moveToThread(self.pict_download_thread)
 
-    self.pict_download_worker.start.connect(self.pict_download_worker.run)
     self.pict_download_worker.progress.connect(thread_progress)
     self.pict_download_worker.finished.connect(thread_finished)
-    self.pict_download_worker.start.emit(
-        raspberry_id, remote_pictures_list, download_dir, remote_pictures_archive_dir
+
+    # cleanup
+    self.pict_download_worker.finished.connect(self.pict_download_thread.quit)
+    self.pict_download_thread.finished.connect(self.pict_download_worker.deleteLater)
+    self.pict_download_thread.finished.connect(self.pict_download_thread.deleteLater)
+
+    # start thread
+    self.pict_download_thread.started.connect(
+        partial(
+            self.pict_download_worker.run,
+            raspberry_id,
+            remote_pictures_list,
+            download_dir,
+            remote_pictures_archive_dir,
+        )
     )
+
+    # self.pict_download_worker.start.connect(self.pict_download_worker.run)
+    self.pict_download_thread.start()
 
 
 def download_timelapse_pictures(self, raspberry_id, download_dir):
@@ -149,12 +165,12 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
 
     remote_pictures_list = get_timelapse_pictures_list(self, raspberry_id)
     if len(remote_pictures_list) == 0:
-        self.rasp_output_lb.setText(f"No pictures to download")
+        self.rasp_output_lb.setText("No pictures to download")
         return
 
     # get pictures archive directory
     response = self.request(raspberry_id, "/timelapse_pictures_archive_dir")
-    if response == None:
+    if response is None:
         return
     if response.status_code != 200:
         self.rasp_output_lb.setText(
@@ -163,7 +179,7 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
         return
     if response.json().get("error", True):
         self.rasp_output_lb.setText(
-            f"Error requiring the time lapse pictures archive directory"
+            "Error requiring the time lapse pictures archive directory"
         )
         return
     remote_pictures_archive_dir = response.json().get("msg", "")
@@ -524,15 +540,16 @@ class Download_pict_worker(QObject):
         # list of Raspberry Pi IP addresses
         self.raspberry_ip = raspberry_ip
 
-    start = Signal(str, list, str, str)
+    # start = Signal(str, list, str, str)
     progress = Signal(str)
     finished = Signal(list)
 
+    @Slot(str, list, str, str)
     def run(
         self, raspberry_id, pictures_list, download_dir, remote_pictures_archive_dir
     ):
 
-        downloaded_pictures = []
+        downloaded_pictures: list = []
         count = 0
         for picture_file_name, picture_size in sorted(pictures_list):
             if (pl.Path(download_dir) / pl.Path(picture_file_name)).is_file():

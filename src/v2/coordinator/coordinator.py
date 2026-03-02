@@ -36,7 +36,7 @@ import time_lapse
 import urllib3
 import video_recording
 from coordinator_ui import Ui_MainWindow
-from PySide6.QtCore import QSettings, Qt, QTimer, QUrl
+from PySide6.QtCore import QObject, QSettings, Qt, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import (
@@ -74,20 +74,22 @@ def date_iso():
     return datetime.datetime.now().replace(microsecond=0).isoformat().replace("T", " ")
 
 
-'''
-def md5sum(file_path):
+def get_ip() -> str:
     """
-    Return the MD5 sum of the file content
+    return IP address. Does not need to be connected to internet
+    https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
     """
-    md5_hash = hashlib.md5()
 
-    with open("test.txt", "rb") as a_file:
-        content = a_file.read()
+    if platform.system() in ("Linux", "darwin"):
+        result = subprocess.run(
+            ["hostname", "-I"], capture_output=True, text=True, check=True
+        )
 
-    md5_hash.update(content)
-    digest = md5_hash.hexdigest()
-    return digest
-'''
+        ips = result.stdout.strip().split()
+        if ips:
+            return " ".join(ips)
+        else:
+            return "Not connected"
 
 
 def ping(host):
@@ -101,35 +103,6 @@ def ping(host):
         subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         == 0
     )
-
-
-def get_ip() -> str:
-    """
-    return IP address. Does not need to be connected to internet
-    https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
-    """
-
-    """
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # doesn't even have to be reachable
-        s.connect(("10.255.255.255", 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = "127.0.0.1"
-    finally:
-        s.close()
-    return IP
-    """
-    result = subprocess.run(
-        ["hostname", "-I"], capture_output=True, text=True, check=True
-    )
-
-    ips = result.stdout.strip().split()
-    if ips:
-        return " ".join(ips)
-    else:
-        return "Not connected"
 
 
 def get_wlan_ip_address() -> str:
@@ -725,8 +698,8 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 None,
                 "Raspberry Pi coordinator",
                 "No video to download",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
 
@@ -738,8 +711,8 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 None,
                 "Raspberry Pi coordinator",
                 "Select the video to download",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
 
@@ -749,7 +722,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 self,
                 "Select Directory",
                 str(Path.home()),
-                options=QFileDialog.ShowDirsOnly,
+                options=QFileDialog.Option.ShowDirsOnly,
             )
         )
         if not directory_path:
@@ -771,7 +744,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 self,
                 "Select a directory to save the time lapse pictures",
                 str(Path.home()),
-                options=QFileDialog.ShowDirsOnly,
+                options=QFileDialog.Option.ShowDirsOnly,
             )
         )
 
@@ -791,7 +764,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 self,
                 "Select a directory to save the live pictures",
                 str(Path.home()),
-                options=QFileDialog.ShowDirsOnly,
+                options=QFileDialog.Option.ShowDirsOnly,
             )
         )
 
