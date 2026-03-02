@@ -304,132 +304,6 @@ def schedule_time_lapse(self, raspberry_id):
         )
         return
 
-    """
-    # check hours format
-    hours = self.picture_hours_le.text().replace(" ", "")
-    if hours == "*":
-        hours_str = "*"
-    else:
-        hours_splt = hours.split(",")
-        try:
-            int_hours_list = [int(x) for x in hours_splt]
-            for x in int_hours_list:
-                if not (0 <= x < 24):
-                    raise
-        except Exception:
-            QMessageBox.information(
-                None,
-                "Raspberry Pi coordinator",
-                "The hour(s) format is not correct. Example; 1,2,13,15 or *",
-                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-                QMessageBox.StandardButton.NoButton,
-            )
-            return
-        hours_str = ",".join([str(x) for x in int_hours_list])
-
-    # check minutes format
-    minutes = self.picture_minutes_le.text().replace(" ", "")
-    if minutes == "*":
-        minutes_str = minutes
-    else:
-        minutes_splt = minutes.split(",")
-        try:
-            int_minutes_list = [int(x) for x in minutes_splt]
-            for x in int_minutes_list:
-                if not (0 <= x < 60):
-                    raise
-        except Exception:
-            QMessageBox.information(
-                None,
-                "Raspberry Pi coordinator",
-                "The minutes(s) format is not correct. Example; 1,2,13,15 or *",
-                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-                QMessageBox.StandardButton.NoButton,
-            )
-            return
-
-        minutes_str = ",".join([str(x) for x in int_minutes_list])
-
-    # check days of month format
-    dom = self.picture_days_of_month_le.text().replace(" ", "")
-    if dom == "*":
-        dom_str = dom
-    else:
-        dom_splt = dom.split(",")
-        try:
-            int_dom_list = [int(x) for x in dom_splt]
-            for x in int_dom_list:
-                if not (1 <= x <= 31):
-                    raise
-        except Exception:
-            QMessageBox.information(
-                None,
-                "Raspberry Pi coordinator",
-                "The day(s) of month format is not correct. Example; 1,2,13,15 or *",
-                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-                QMessageBox.StandardButton.NoButton,
-            )
-            return
-        dom_str = ",".join([str(x) for x in int_dom_list])
-
-    # check month format
-    month = self.picture_months_le.text().replace(" ", "")
-    if month == "*":
-        month_str = month
-    else:
-        month_splt = month.split(",")
-        try:
-            int_month_list = [int(x) for x in month_splt]
-            for x in int_month_list:
-                if not (1 <= x <= 12):
-                    raise
-        except Exception:
-            QMessageBox.information(
-                None,
-                "Raspberry Pi coordinator",
-                "The month format is not correct. Example; 1,2,12 or *",
-                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-                QMessageBox.StandardButton.NoButton,
-            )
-            return
-        month_str = ",".join([str(x) for x in int_month_list])
-
-    # check days(s) of week format
-    dow = self.picture_days_of_week_le.text().replace(" ", "")
-    if dow == "*":
-        dow_str = dow
-    else:
-        dow_splt = dow.split(",")
-        try:
-            int_dow_splt = [int(x) for x in dow_splt]
-        except Exception:
-            try:
-                for x in dow_splt:
-                    if x.upper() not in [
-                        "SUN",
-                        "MON",
-                        "TUE",
-                        "WED",
-                        "THU",
-                        "FRI",
-                        "SAT",
-                    ]:
-                        raise
-                int_dow_splt = dow_splt
-            except Exception:
-                QMessageBox.information(
-                    None,
-                    "Raspberry Pi coordinator",
-                    "The days(s) of week format is not correct. Example; 0,1,2 or SUN,MON,TUE",
-                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-                    QMessageBox.StandardButton.NoButton,
-                )
-
-        dow_str = ",".join([str(x) for x in int_dow_splt])
-
-    crontab_event = f"{minutes_str} {hours_str} {dom_str} {month_str} {dow_str}"
-    """
-
     logging.info(f"crontab event: {crontab_event} for {raspberry_id}")
 
     width, height = self.raspberry_info[raspberry_id]["picture resolution"].split("x")
@@ -439,16 +313,20 @@ def schedule_time_lapse(self, raspberry_id):
         "timeout": self.raspberry_info[raspberry_id]["time lapse duration"],
         "width": width,
         "height": height,
-        "brightness": self.raspberry_info[raspberry_id]["picture brightness"],
-        "contrast": self.raspberry_info[raspberry_id]["picture contrast"],
-        "saturation": self.raspberry_info[raspberry_id]["picture saturation"],
-        "sharpness": self.raspberry_info[raspberry_id]["picture sharpness"],
-        "gain": self.raspberry_info[raspberry_id]["picture gain"],
         "rotation": self.raspberry_info[raspberry_id]["picture rotation"],
         "hflip": self.raspberry_info[raspberry_id]["picture hflip"],
         "vflip": self.raspberry_info[raspberry_id]["picture vflip"],
-        # "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
     }
+
+    if self.cb_enable_picture_parameters.isChecked():
+        data["brightness"] = self.raspberry_info[raspberry_id]["picture brightness"]
+        data["contrast"] = self.raspberry_info[raspberry_id]["picture contrast"]
+        data["saturation"] = self.raspberry_info[raspberry_id]["picture saturation"]
+        data["sharpness"] = self.raspberry_info[raspberry_id]["picture sharpness"]
+        data["gain"] = self.raspberry_info[raspberry_id]["picture gain"]
+        data["annotate"] = self.raspberry_info[raspberry_id]["picture annotation"]
+
+        # "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
 
     logging.info(f"data: {data} for {raspberry_id}")
 
@@ -521,7 +399,7 @@ def take_picture(self, raspberry_id: str, mode: str):
         "timeout": self.raspberry_info[raspberry_id]["time lapse duration"]
         if mode == "time lapse"
         else 0,
-        "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
+        # "annotate": self.raspberry_info[raspberry_id]["picture annotation"],
     }
 
     if self.cb_enable_picture_parameters.isChecked():
@@ -530,6 +408,7 @@ def take_picture(self, raspberry_id: str, mode: str):
         data["saturation"] = self.raspberry_info[raspberry_id]["picture saturation"]
         data["sharpness"] = self.raspberry_info[raspberry_id]["picture sharpness"]
         data["gain"] = self.raspberry_info[raspberry_id]["picture gain"]
+        data["annotate"] = self.raspberry_info[raspberry_id]["picture annotation"]
 
         # "ISO": self.raspberry_info[raspberry_id]['picture iso'],
 
