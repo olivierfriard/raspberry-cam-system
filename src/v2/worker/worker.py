@@ -27,7 +27,7 @@ import config as cfg
 from crontab import CronTab  # from python-crontab (not crontab)
 from flask import Flask, Response, request, send_from_directory
 
-__version__ = "2.0.3"
+__version__ = "2.0.4"
 __version_date__ = "2026-03-02"
 
 
@@ -1097,10 +1097,8 @@ def take_picture():
                     pl.Path(__file__).resolve().parent
                     / pl.Path(cfg.STATIC_DIR)
                     / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
-                    / pl.Path(
-                        f'{socket.gethostname()}_$(date -u +"%Y-%m-%d_%H%M%S")'
-                    ).with_suffix(".jpg")
                 ),
+                "--datetime",
             ]
         )
 
