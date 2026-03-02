@@ -624,7 +624,7 @@ def delete_time_lapse_schedule():
     cron = CronTab(user="pi")
     try:
         for job in cron:
-            if CAMERA_COMMAND in job.command:
+            if CAMERA_COMMAND in job.command or RPICAM_SHOT_SCRIPT in job.command:
                 cron.remove(job)
         cron.write()
     except Exception:

@@ -47,8 +47,8 @@ def delete_time_lapse_schedule(self, raspberry_id):
     delete all time lapse schedule
     """
 
-    response = self.request(raspberry_id, f"/delete_time_lapse_schedule")
-    if response == None:
+    response = self.request(raspberry_id, "/delete_time_lapse_schedule")
+    if response is None:
         return
 
     if response.status_code != 200:
