@@ -83,18 +83,6 @@ def get_ip() -> str:
     https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
     """
 
-    """
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # doesn't even have to be reachable
-        s.connect(("10.255.255.255", 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = "127.0.0.1"
-    finally:
-        s.close()
-    return IP
-    """
     result = subprocess.run(
         ["hostname", "-I"], capture_output=True, text=True, check=True
     )
@@ -1088,6 +1076,7 @@ def take_picture():
         )
         # command_line.extend(["--timestamp"])
 
+        """
         command_line.extend(
             [
                 "-o",
@@ -1099,6 +1088,22 @@ def take_picture():
                 ),
             ]
         )
+        """
+
+        command_line.extend(
+            [
+                "-o",
+                str(
+                    pl.Path(__file__).resolve().parent
+                    / pl.Path(cfg.STATIC_DIR)
+                    / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                    / pl.Path(
+                        f'{socket.gethostname()}_$(date -u +"\%Y-\%m-\%d_\%H\%M\%S")'
+                    ).with_suffix(".jpg")
+                ),
+            ]
+        )
+
         logging.info(f"time lapse command: {' '.join(command_line)}")
         try:
             subprocess.Popen(command_line)
