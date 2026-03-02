@@ -542,7 +542,7 @@ def schedule_time_lapse():
 
     command_line.extend(
         [
-            "--output",
+            "--outdir",
             str(
                 Path(__file__).resolve().parent
                 / Path(cfg.STATIC_DIR)
