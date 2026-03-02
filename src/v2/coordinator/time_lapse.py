@@ -90,13 +90,14 @@ def download_live_pictures(self, raspberry_id, download_dir):
     """
 
     def thread_progress(output):
-        self.rasp_output_lb.setText(output)
+        # self.rasp_output_lb.setText(output)
+        print(output)
 
     def thread_finished(downloaded_pictures_list):
-        self.rasp_output_lb.setText(
-            f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
-        )
-        self.video_list_clicked()
+        # self.rasp_output_lb.setText(
+        #    f"{len(downloaded_pictures_list)} pictures downloaded in <b>{download_dir}</b>"
+        # )
+        # self.video_list_clicked()
         self.pict_download_thread.quit()
 
     remote_pictures_list = get_live_pictures_list(self, raspberry_id)
@@ -155,6 +156,7 @@ def download_timelapse_pictures(self, raspberry_id, download_dir):
 
     def thread_progress(output):
         # self.rasp_output_lb.setText(output)
+        print(output)
         pass
 
     def thread_finished(downloaded_pictures_list):
