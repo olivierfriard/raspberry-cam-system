@@ -263,49 +263,22 @@ def schedule_time_lapse(self, raspberry_id):
     Schedule the picture taking on the Raspberry Pi
     """
 
-    if self.picture_hours_le.text() == "":
-        QMessageBox.information(
-            None,
-            "Raspberry Pi coordinator",
-            "Specify the hour(s) to start time lapse",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-            QMessageBox.StandardButton.NoButton,
-        )
-        return
-
-    if self.picture_minutes_le.text() == "":
-        QMessageBox.information(
-            None,
-            "Raspberry Pi coordinator",
-            "Specify the minutes(s) to start time lapse",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-            QMessageBox.StandardButton.NoButton,
-        ).StandardButton
-        return
-
-    if self.picture_days_of_week_le.text() == "":
-        QMessageBox.information(
-            None,
-            "Raspberry Pi coordinator",
-            "Specify the day(s) of the week to start time lapse (0-6 or SUN-SAT)",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-            QMessageBox.StandardButton.NoButton,
-        )
-        return
-
-    if self.picture_days_of_month_le.text() == "":
-        QMessageBox.information(
-            None,
-            "Raspberry Pi coordinator",
-            "Specify the day(s) of the month to start time lapse (1-31)",
-            QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
-            QMessageBox.StandardButton.NoButton,
-        )
-        return
-
-    # use crontab to test:
-    # job = cron.new(command='test')
-    # job.setall('min hour DOM month DOW')
+    for w in (
+        self.picture_hours_le,
+        self.picture_minutes_le,
+        self.picture_days_of_week_le,
+        self.picture_days_of_month_le,
+        self.picture_months_le,
+    ):
+        if not w.text():
+            QMessageBox.information(
+                None,
+                "Raspberry Pi coordinator",
+                "Specify the hour(s) to start time lapse",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
+            )
+            return
 
     minutes = self.picture_minutes_le.text().strip()
     hours = self.picture_hours_le.text().strip()
@@ -344,8 +317,8 @@ def schedule_time_lapse(self, raspberry_id):
     width, height = self.raspberry_info[raspberry_id]["picture resolution"].split("x")
     data = {
         "crontab": crontab_event,
-        "timelapse": self.raspberry_info[raspberry_id]["time lapse wait"],
-        "timeout": self.raspberry_info[raspberry_id]["time lapse duration"],
+        # "timelapse": self.raspberry_info[raspberry_id]["time lapse wait"],
+        # "timeout": self.raspberry_info[raspberry_id]["time lapse duration"],
         "width": width,
         "height": height,
         "rotation": self.raspberry_info[raspberry_id]["picture rotation"],
