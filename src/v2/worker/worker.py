@@ -27,7 +27,7 @@ import config as cfg
 from crontab import CronTab  # from python-crontab (not crontab)
 from flask import Flask, Response, request, send_from_directory
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 __version_date__ = "2026-03-02"
 
 
