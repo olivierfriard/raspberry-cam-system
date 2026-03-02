@@ -14,7 +14,6 @@ import fcntl
 import hashlib
 import json
 import logging
-import pathlib as pl
 import shutil
 import socket
 import struct
@@ -22,6 +21,7 @@ import subprocess
 import threading
 import time
 from functools import wraps
+from pathlib import Path
 
 import config as cfg
 from crontab import CronTab  # from python-crontab (not crontab)
@@ -169,7 +169,7 @@ def get_cpu_temperature() -> str:
     """
     get temperature of the CPU
     """
-    if not pl.Path(VCGENCMD_PATH).is_file():
+    if not Path(VCGENCMD_PATH).is_file():
         return "not determined"
     process = subprocess.run([VCGENCMD_PATH, "measure_temp"], stdout=subprocess.PIPE)
     output = process.stdout.decode("utf-8").strip()
@@ -238,10 +238,10 @@ class Libcamera_vid_thread(threading.Thread):
         )
 
         file_path = str(
-            pl.Path(__file__).resolve().parent
-            / pl.Path(cfg.STATIC_DIR)
-            / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
-            / pl.Path(f"{socket.gethostname()}_{prefix}{file_name}.h264")
+            Path(__file__).resolve().parent
+            / Path(cfg.STATIC_DIR)
+            / Path(cfg.VIDEO_ARCHIVE_DIR)
+            / Path(f"{socket.gethostname()}_{prefix}{file_name}.h264")
         )
 
         command_line.extend(["-o", file_path])
@@ -257,10 +257,10 @@ class Libcamera_vid_thread(threading.Thread):
 
         try:
             with open(
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
-                / pl.Path(f"{socket.gethostname()}_{prefix}{file_name}.md5sum"),
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path(cfg.VIDEO_ARCHIVE_DIR)
+                / Path(f"{socket.gethostname()}_{prefix}{file_name}.md5sum"),
                 "w",
             ) as f_out:
                 f_out.write(process.stdout.decode("utf-8"))
@@ -303,8 +303,8 @@ while True:
 
 
 # load security key
-if pl.Path("/boot/worker_security_key").is_file():
-    with pl.Path("/boot/worker_security_key").open() as f_in:
+if Path("/boot/worker_security_key").is_file():
+    with Path("/boot/worker_security_key").open() as f_in:
         security_key_sha256 = f_in.read().strip()
     logging.info("Security key loaded")
 else:
@@ -313,27 +313,25 @@ else:
 
 
 # create static directory
-(pl.Path(__file__).resolve().parent / cfg.STATIC_DIR).mkdir(parents=True, exist_ok=True)
+(Path(__file__).resolve().parent / cfg.STATIC_DIR).mkdir(parents=True, exist_ok=True)
 
 # create VIDEO_ARCHIVE_DIR
 (
-    pl.Path(__file__).resolve().parent
-    / pl.Path(cfg.STATIC_DIR)
-    / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+    Path(__file__).resolve().parent / Path(cfg.STATIC_DIR) / Path(cfg.VIDEO_ARCHIVE_DIR)
 ).mkdir(parents=True, exist_ok=True)
 
 # create TIME_LAPSE_ARCHIVE_DIR
 (
-    pl.Path(__file__).resolve().parent
-    / pl.Path(cfg.STATIC_DIR)
-    / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+    Path(__file__).resolve().parent
+    / Path(cfg.STATIC_DIR)
+    / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
 ).mkdir(parents=True, exist_ok=True)
 
 # create LIVE_PICTURES_ARCHIVE_DIR
 (
-    pl.Path(__file__).resolve().parent
-    / pl.Path(cfg.STATIC_DIR)
-    / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+    Path(__file__).resolve().parent
+    / Path(cfg.STATIC_DIR)
+    / Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
 ).mkdir(parents=True, exist_ok=True)
 
 
@@ -501,11 +499,7 @@ def schedule_time_lapse():
 
     logging.info(f"crontab event: {crontab_event}")
 
-    command_line = [
-        CAMERA_COMMAND,
-        "-q",
-        "90",
-    ]
+    command_line = ["bash", str(Path(__file__).parent / "rpicam_shot.bash")]
 
     for key in request.values:
         if key in ["timelapse", "timeout", "prefix", "annotate", "key", "crontab"]:
@@ -537,10 +531,10 @@ def schedule_time_lapse():
         [
             "-o",
             str(
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
-                / pl.Path(f"{socket.gethostname()}_%04d").with_suffix(".jpg")
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                / Path(f"{socket.gethostname()}_%04d").with_suffix(".jpg")
             ),
         ]
     )
@@ -548,14 +542,11 @@ def schedule_time_lapse():
 
     command_line.extend(
         [
-            "-o",
+            "--output",
             str(
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
-                / pl.Path(
-                    f'{socket.gethostname()}_$(date -u +"\%Y-\%m-\%d_\%H\%M\%S")'
-                ).with_suffix(".jpg")
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
             ),
         ]
     )
@@ -742,13 +733,13 @@ def schedule_video_recording():
 
     """
     file_path = (
-        str(pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR) / pl.Path(f"{socket.gethostname()}_{prefix}"))
+        str(Path(cfg.STATIC_DIR) / Path(cfg.VIDEO_ARCHIVE_DIR) / Path(f"{socket.gethostname()}_{prefix}"))
         + "$(/usr/bin/date_crontab_helper).h264"
     )
     """
     file_path = (
-        f"{pl.Path(__file__).resolve().parent / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR) / pl.Path(f'{socket.gethostname()}_{prefix}')}"
-        f"$(bash {pl.Path(__file__).resolve().parent / 'date_crontab_helper'}).h264"
+        f"{Path(__file__).resolve().parent / Path(cfg.STATIC_DIR) / Path(cfg.VIDEO_ARCHIVE_DIR) / Path(f'{socket.gethostname()}_{prefix}')}"
+        f"$(bash {Path(__file__).resolve().parent / 'date_crontab_helper'}).h264"
     )
 
     command_line.extend(["-o", file_path])
@@ -847,9 +838,9 @@ def video_list():
         "video_list": [
             (x.name, x.stat().st_size)
             for x in (
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path(cfg.VIDEO_ARCHIVE_DIR)
             ).glob("*.h264")
         ]
     }
@@ -872,9 +863,9 @@ def timelapse_pictures_list():
         "pictures_list": [
             (x.name, x.stat().st_size)
             for x in (
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
             ).glob("*.jpg")
         ]
     }
@@ -896,9 +887,9 @@ def live_pictures_list():
         "pictures_list": [
             (x.name, x.stat().st_size)
             for x in (
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
             ).glob("*.jpg")
         ]
     }
@@ -915,9 +906,9 @@ def live_pictures_list():
 def get_video(file_name):
     return send_from_directory(
         str(
-            pl.Path(__file__).resolve().parent
-            / pl.Path(cfg.STATIC_DIR)
-            / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
+            Path(__file__).resolve().parent
+            / Path(cfg.STATIC_DIR)
+            / Path(cfg.VIDEO_ARCHIVE_DIR)
         ),
         file_name,
         as_attachment=True,
@@ -1031,9 +1022,9 @@ def take_picture():
                 "sudo",
                 "rm",
                 "-f",
-                pl.Path(__file__).resolve().parent
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path("live.jpg"),
+                Path(__file__).resolve().parent
+                / Path(cfg.STATIC_DIR)
+                / Path("live.jpg"),
             ]
         )
     except Exception:
@@ -1081,10 +1072,10 @@ def take_picture():
             [
                 "-o",
                 str(
-                    pl.Path(__file__).resolve().parent
-                    / pl.Path(cfg.STATIC_DIR)
-                    / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
-                    / pl.Path(f"{socket.gethostname()}_%04d").with_suffix(".jpg")
+                    Path(__file__).resolve().parent
+                    / Path(cfg.STATIC_DIR)
+                    / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                    / Path(f"{socket.gethostname()}_%04d").with_suffix(".jpg")
                 ),
             ]
         )
@@ -1094,9 +1085,9 @@ def take_picture():
             [
                 "-o",
                 str(
-                    pl.Path(__file__).resolve().parent
-                    / pl.Path(cfg.STATIC_DIR)
-                    / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                    Path(__file__).resolve().parent
+                    / Path(cfg.STATIC_DIR)
+                    / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
                 ),
                 "--datetime",
             ]
@@ -1120,10 +1111,10 @@ def take_picture():
                 [
                     "-o",
                     str(
-                        pl.Path(__file__).resolve().parent
-                        / pl.Path(cfg.STATIC_DIR)
-                        / pl.Path("live_pictures")
-                        / pl.Path(request.values["file_name"])
+                        Path(__file__).resolve().parent
+                        / Path(cfg.STATIC_DIR)
+                        / Path("live_pictures")
+                        / Path(request.values["file_name"])
                     ),
                 ]
             )
@@ -1132,9 +1123,9 @@ def take_picture():
                 [
                     "-o",
                     str(
-                        pl.Path(__file__).resolve().parent
-                        / pl.Path(cfg.STATIC_DIR)
-                        / pl.Path("live.jpg")
+                        Path(__file__).resolve().parent
+                        / Path(cfg.STATIC_DIR)
+                        / Path("live.jpg")
                     ),
                 ]
             )
@@ -1194,9 +1185,7 @@ def video_archive_dir():
     try:
         return {
             "error": False,
-            "msg": str(
-                pl.Path("/") / pl.Path(cfg.STATIC_DIR) / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
-            ),
+            "msg": str(Path("/") / Path(cfg.STATIC_DIR) / Path(cfg.VIDEO_ARCHIVE_DIR)),
         }
     except Exception:
         return {"error": True}
@@ -1212,9 +1201,7 @@ def timelapse_pictures_archive_dir():
         return {
             "error": False,
             "msg": str(
-                pl.Path("/")
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+                Path("/") / Path(cfg.STATIC_DIR) / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
             ),
         }
     except Exception:
@@ -1232,9 +1219,7 @@ def live_pictures_archive_dir():
         return {
             "error": False,
             "msg": str(
-                pl.Path("/")
-                / pl.Path(cfg.STATIC_DIR)
-                / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+                Path("/") / Path(cfg.STATIC_DIR) / Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
             ),
         }
     except Exception:
@@ -1259,16 +1244,16 @@ def delete_video():
 
     for video_file_name, _ in json.loads(request.values.get("video list", "[]")):
         (
-            pl.Path(__file__).resolve().parent
-            / pl.Path(cfg.STATIC_DIR)
-            / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
-            / pl.Path(video_file_name)
+            Path(__file__).resolve().parent
+            / Path(cfg.STATIC_DIR)
+            / Path(cfg.VIDEO_ARCHIVE_DIR)
+            / Path(video_file_name)
         ).unlink(missing_ok=True)
         (
-            pl.Path(__file__).resolve().parent
-            / pl.Path(cfg.STATIC_DIR)
-            / pl.Path(cfg.VIDEO_ARCHIVE_DIR)
-            / pl.Path(video_file_name).with_suffix(".md5sum")
+            Path(__file__).resolve().parent
+            / Path(cfg.STATIC_DIR)
+            / Path(cfg.VIDEO_ARCHIVE_DIR)
+            / Path(video_file_name).with_suffix(".md5sum")
         ).unlink(missing_ok=True)
     return {"error": False, "msg": "All video deleted"}
 
@@ -1289,9 +1274,9 @@ def delete_live_pictures():
     logging.debug("Delete all the live pictures")
 
     for file_path in (
-        pl.Path(__file__).resolve().parent
-        / pl.Path(cfg.STATIC_DIR)
-        / pl.Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
+        Path(__file__).resolve().parent
+        / Path(cfg.STATIC_DIR)
+        / Path(cfg.LIVE_PICTURES_ARCHIVE_DIR)
     ).glob("*"):
         file_path.unlink(missing_ok=True)
     return {"error": False, "msg": "All live pictures deleted"}
@@ -1313,9 +1298,9 @@ def delete_timelapse_pictures():
     logging.debug("Delete all the time lapse pictures")
 
     for file_path in (
-        pl.Path(__file__).resolve().parent
-        / pl.Path(cfg.STATIC_DIR)
-        / pl.Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
+        Path(__file__).resolve().parent
+        / Path(cfg.STATIC_DIR)
+        / Path(cfg.TIME_LAPSE_ARCHIVE_DIR)
     ).glob("*"):
         file_path.unlink(missing_ok=True)
     return {"error": False, "msg": "All time lapse pictures deleted"}
