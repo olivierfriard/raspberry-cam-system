@@ -94,7 +94,7 @@ else
   timestamp="$(date +"%Y-%m-%dT%H-%M-%S")"
 fi
 
-outfile="$OUTDIR/img_${timestamp}.jpg"
+outfile="$OUTDIR/${timestamp}.jpg"
 mv -- "$tmpfile" "$outfile"
 trap - EXIT
 
