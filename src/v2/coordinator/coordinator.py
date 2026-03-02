@@ -36,7 +36,7 @@ import time_lapse
 import urllib3
 import video_recording
 from coordinator_ui import Ui_MainWindow
-from PySide6.QtCore import QObject, QSettings, Qt, QTimer, QUrl, Signal, Slot
+from PySide6.QtCore import QSettings, Qt, QTimer, QUrl
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtMultimediaWidgets import (
