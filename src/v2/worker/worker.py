@@ -34,6 +34,7 @@ __version_date__ = "2026-03-02"
 VCGENCMD_PATH = "/usr/bin/vcgencmd"
 # CAMERA_COMMAND = "libcamera-still" # deprecated on Debian trixie
 CAMERA_COMMAND = "rpicam-still"
+RPICAM_SHOT_SCRIPT = "rpicam_shot.bash"
 # VIDEO_COMMAND = "libcamera-vid"
 VIDEO_COMMAND = "rpicam-vid"
 
@@ -499,7 +500,7 @@ def schedule_time_lapse():
 
     logging.info(f"crontab event: {crontab_event}")
 
-    command_line = ["bash", str(Path(__file__).parent / "rpicam_shot.bash")]
+    command_line = ["bash", str(Path(__file__).parent / RPICAM_SHOT_SCRIPT)]
 
     for key in request.values:
         if key in ["timelapse", "timeout", "prefix", "annotate", "key", "crontab"]:
@@ -590,7 +591,7 @@ def view_time_lapse_schedule():
     output = []
     try:
         for job in cron:
-            if CAMERA_COMMAND in job.command:
+            if CAMERA_COMMAND in job.command or RPICAM_SHOT_SCRIPT in job.command:
                 output.append(
                     [
                         str(job.minutes),
