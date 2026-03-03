@@ -80,7 +80,7 @@ def get_ip() -> str:
     https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
     """
 
-    if platform.system() in ("Linux", "darwin"):
+    if platform.system() in ("Linux", "Darwin"):
         result = subprocess.run(
             ["hostname", "-I"], capture_output=True, text=True, check=True
         )

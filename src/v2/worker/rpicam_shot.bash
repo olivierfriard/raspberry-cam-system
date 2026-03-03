@@ -94,7 +94,9 @@ else
   timestamp="$(date +"%Y-%m-%d_%H-%M-%S")"
 fi
 
-outfile="$OUTDIR/${timestamp}.jpg"
+HOSTNAME="$(hostname -s)"
+
+outfile="$OUTDIR/${HOSTNAME}_${timestamp}.jpg"
 mv -- "$tmpfile" "$outfile"
 trap - EXIT
 
