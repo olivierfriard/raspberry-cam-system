@@ -575,18 +575,13 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
             time.sleep(1)
 
-            self.media_list.setMedia(
-                # QMediaContent(QUrl(f"http://{self.raspberry_ip[raspberry_id]}:9090/stream/video.mjpeg")
-                QMediaContent(
-                    # QUrl(f"rtsp://{self.raspberry_ip[raspberry_id]}:8554/stream")
-                    # QUrl(f"udp://{self.raspberry_ip[raspberry_id]}:6000")
-                    QUrl(f"tcp://{self.raspberry_ip[raspberry_id]}:6000")
-                )
+            self.media_list.setSource(
+                QUrl(f"tcp://{self.raspberry_ip[raspberry_id]}:6000")
             )
 
-            os.system(
-                f'ffplay tcp://{self.raspberry_ip[raspberry_id]}:6000 -vf "setpts=N/30" -fflags nobuffer -flags low_delay -framedrop'
-            )
+            # os.system(
+            #    f'ffplay tcp://{self.raspberry_ip[raspberry_id]}:6000 -vf "setpts=N/30" -fflags nobuffer -flags low_delay -framedrop'
+            # )
 
             # self.media_list.play()
             self.rasp_output_lb.setText("Video streaming active")
