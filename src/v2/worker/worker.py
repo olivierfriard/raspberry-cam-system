@@ -125,18 +125,11 @@ def video_streaming_active():
     check if uv4l process is present
     """
 
+    video_stream_process: str = "stream_video.py"
+
     process = subprocess.run(["ps", "auxwg"], stdout=subprocess.PIPE)
     processes_list = process.stdout.decode("utf-8").split("\n")
-    return (
-        len(
-            [
-                x
-                for x in processes_list
-                if "/usr/bin/vlc -I dummy stream:///dev/stdin" in x
-            ]
-        )
-        > 0
-    )
+    return len([x for x in processes_list if video_stream_process in x]) > 0
 
 
 def recording_video_active():
@@ -449,32 +442,21 @@ def status():
 def video_streaming(action):
     """
     start/stop video streaming with uv4l
-
-    DEPRECATED
-                see /etc/uv4l/uv4l-raspicam.conf for default configuration
-                sudo uv4l -nopreview --auto-video_nr --driver raspicam --encoding mjpeg --width 640 --height 480 --framerate 10 --server-option '--port=9090'
-                --server-option '--max-queued-connections=30' --server-option '--max-streams=25' --server-option '--max-threads=29'
-
-    libcamera-vid -t 0 --inline --listen -o - | cvlc stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554/stream}' :demux=h264
-
     """
-    # kill current streaming
-    try:
-        subprocess.run(["sudo", "pkill", "vlc"])
-        time.sleep(2)
-    except Exception:
-        return {"msg": "Problem trying to stop the video streaming"}
 
     if action == "stop":
         return {"msg": "video streaming stopped"}
 
     if action == "start":
-        try:
-            thread = Video_streaming_thread()
-            thread.start()
-            return {"msg": "video streaming started"}
-        except Exception:
-            return {"msg": "video streaming not started"}
+        # try:
+        #    thread = Video_streaming_thread()
+        #    thread.start()
+        #    return {"msg": "video streaming started"}
+        # except Exception:
+        #    return {"msg": "video streaming not started"}
+
+        process = subprocess.Popen([sys.executable, "stream_video.py"])
+        return {"msg": "video streaming started"}
 
 
 @app.route(
