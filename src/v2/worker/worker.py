@@ -448,6 +448,9 @@ def video_streaming(action):
     logging.info(f"video streaming: {action}")
 
     if action == "stop":
+        subprocess.run(["sudo", "killall", "stream_video.py"])
+        time.sleep(2)
+
         return {"msg": "video streaming stopped"}
 
     if action == "start":
