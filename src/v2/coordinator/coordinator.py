@@ -572,7 +572,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             # )
             #
 
-            time.sleep(1)
+            time.sleep(3)
 
             # f"{cfg.PROTOCOL}{self.raspberry_ip[raspberry_id]}{cfg.SERVER_PORT}"
 
