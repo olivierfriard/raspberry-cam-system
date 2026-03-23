@@ -455,7 +455,11 @@ def video_streaming(action):
         # except Exception:
         #    return {"msg": "video streaming not started"}
 
-        process = subprocess.Popen([sys.executable, "stream_video.py"])
+        process = subprocess.Popen(
+            [sys.executable, str(Path(__file__).parent / "stream_video.py")]
+        )
+        logging.info(f"crontab event: {crontab_event}")
+        logging.info(process)
         return {"msg": "video streaming started"}
 
 
