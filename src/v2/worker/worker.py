@@ -29,8 +29,8 @@ import psutil
 from crontab import CronTab  # from python-crontab (not crontab)
 from flask import Flask, Response, request, send_from_directory
 
-__version__ = "2.0.4"
-__version_date__ = "2026-03-02"
+__version__ = "2.1"
+__version_date__ = "2026-03-23"
 
 
 VCGENCMD_PATH = "/usr/bin/vcgencmd"

@@ -66,7 +66,7 @@ class MjpegViewerWidget(QWidget):
         self.thread = None
         self.worker = None
 
-        self.image_label = QLabel("Nessuno stream attivo")
+        self.image_label = QLabel("No active stream")
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setStyleSheet("background-color: black; color: white;")
 
@@ -76,13 +76,13 @@ class MjpegViewerWidget(QWidget):
 
     def start_stream(self, url: str):
         if not url:
-            self.show_error("URL stream non valida")
+            self.show_error("URL for stream not valid")
             return
 
         self.stop_stream(clear_image=False)
 
         self._current_url = url
-        self.image_label.setText("Connessione allo stream...")
+        self.image_label.setText("Connection to video stream...")
         self.image_label.setPixmap(QPixmap())
         self._last_pixmap = QPixmap()
 
@@ -114,7 +114,7 @@ class MjpegViewerWidget(QWidget):
         if clear_image:
             self._last_pixmap = QPixmap()
             self.image_label.setPixmap(QPixmap())
-            self.image_label.setText("Stream fermato")
+            self.image_label.setText("Stream stopped")
 
     @Slot()
     def _on_thread_finished(self):
@@ -143,8 +143,8 @@ class MjpegViewerWidget(QWidget):
     @Slot(str)
     def show_error(self, message: str):
         self.image_label.setPixmap(QPixmap())
-        self.image_label.setText("Errore stream")
-        QMessageBox.critical(self, "Errore", message)
+        self.image_label.setText("Video stream error")
+        QMessageBox.critical(self, "Error", message)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

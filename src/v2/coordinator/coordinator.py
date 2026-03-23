@@ -9,8 +9,8 @@ TODO:
 
 """
 
-__version__ = "2.0.2"
-__version_date__ = "2026-03-02"
+__version__ = "2.1.0"
+__version_date__ = "2026-03-23"
 
 import argparse
 import base64
@@ -601,6 +601,9 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         if action == "stop":
             self.rasp_output_lb.setText("Video streaming stop requested")
+
+            self.video_stream_viewer.stop_stream()
+
             response = self.request(raspberry_id, "/video_streaming/stop")
             if response is None:
                 return
