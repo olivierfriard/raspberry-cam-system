@@ -38,20 +38,17 @@ import video_recording
 from coordinator_ui import Ui_MainWindow
 from PySide6.QtCore import QSettings, Qt, QTimer, QUrl
 from PySide6.QtGui import QFont, QIcon
-from PySide6.QtMultimedia import QMediaPlayer
-from PySide6.QtMultimediaWidgets import (
-    QVideoWidget,
-)  #  sudo apt install libqt5multimedia5-plugins
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
-    QHBoxLayout,
     QInputDialog,
     QListWidgetItem,
     QMainWindow,
     QMessageBox,
     QSizePolicy,
+    QVBoxLayout,
 )
+from video_stream_viewer import MjpegViewerWidget
 
 urllib3.disable_warnings()
 
@@ -303,8 +300,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             partial(self.video_streaming_clicked, "stop")
         )
 
-        self.streaming_wdg.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # self.streaming_wdg.setAlignment(Qt.AlignCenter)
+        # self.streaming_wdg.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # video recording
         self.start_video_recording_pb.clicked.connect(
@@ -328,17 +324,19 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         self.all_video_cb.clicked.connect(self.all_video_clicked)
         self.all_new_video_cb.clicked.connect(self.all_new_video_clicked)
 
-        # self.media_list = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-        self.media_list = QMediaPlayer(self)
+        # self.media_list = QMediaPlayer(self)
+        # videoWidget = QVideoWidget()
+        # self.media_list.setVideoOutput(videoWidget)
+        # streaming_layout = QHBoxLayout()
+        # streaming_layout.setContentsMargins(0, 0, 0, 0)
+        # streaming_layout.addWidget(videoWidget)
+        # self.streaming_wdg.setLayout(streaming_layout)
 
-        videoWidget = QVideoWidget()
-        self.media_list.setVideoOutput(videoWidget)
+        self.video_stream_viewer = MjpegViewerWidget()
 
-        streaming_layout = QHBoxLayout()
-        streaming_layout.setContentsMargins(0, 0, 0, 0)
-        streaming_layout.addWidget(videoWidget)
-
-        self.streaming_wdg.setLayout(streaming_layout)
+        layout = QVBoxLayout(self.streaming_wdg)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.video_stream_viewer)
 
         self.video_fps_sb.setMinimum(cfg.MIN_VIDEO_FPS)
         self.video_fps_sb.setMaximum(cfg.MAX_VIDEO_FPS)
@@ -560,33 +558,36 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             if response is None:
                 return
 
-            if response.status_code != HTTPStatus.OK:
-                self.rasp_output_lb.setText(
-                    f"Error during the video streaming (status code: {response.status_code})"
-                )
-                return
-
-            if self.rasp_output_lb.setText(response.json().get("error", "")):
-                self.rasp_output_lb.setText("Error starting streaming")
-                return
-            self.rasp_output_lb.setText(
-                response.json().get("msg", "Error starting streaming")
-            )
+            # if response.status_code != HTTPStatus.OK:
+            #    self.rasp_output_lb.setText(
+            #        f"Error during the video streaming (status code: {response.status_code})"
+            #    )
+            #    return
+            #
+            # if self.rasp_output_lb.setText(response.json().get("error", "")):
+            #    self.rasp_output_lb.setText("Error starting streaming")
+            #    return
+            # self.rasp_output_lb.setText(
+            #    response.json().get("msg", "Error starting streaming")
+            # )
+            #
 
             time.sleep(1)
 
-            self.media_list.setSource(
-                QUrl(f"tcp://{self.raspberry_ip[raspberry_id]}:6000")
+            # f"{cfg.PROTOCOL}{self.raspberry_ip[raspberry_id]}{cfg.SERVER_PORT}"
+
+            print(f"{self.raspberry_ip[raspberry_id]=}")  # remove before release
+
+            self.video_stream_viewer.start_stream(
+                f"http://{self.raspberry_ip[raspberry_id]}:8000/stream.mjpg"
             )
 
-            # os.system(
-            #    f'ffplay tcp://{self.raspberry_ip[raspberry_id]}:6000 -vf "setpts=N/30" -fflags nobuffer -flags low_delay -framedrop'
+            # self.media_list.setSource(
+            #    QUrl(f"tcp://{self.raspberry_ip[raspberry_id]}:6000")
             # )
-
+            #
             # self.media_list.play()
-            self.rasp_output_lb.setText("Video streaming active")
-
-            # self.media_list.play()
+            # self.rasp_output_lb.setText("Video streaming active")
 
             # generate QR code
             """
