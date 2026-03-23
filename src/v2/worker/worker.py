@@ -25,6 +25,7 @@ from functools import wraps
 from pathlib import Path
 
 import config as cfg
+import psutil
 from crontab import CronTab  # from python-crontab (not crontab)
 from flask import Flask, Response, request, send_from_directory
 
@@ -448,19 +449,24 @@ def video_streaming(action):
     logging.info(f"video streaming: {action}")
 
     if action == "stop":
-        subprocess.run(["sudo", "killall", "stream_video.py"])
+        target = "stream_video.py"
+
+        for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+            try:
+                cmdline = proc.info["cmdline"] or []
+                full_cmd = " ".join(cmdline)
+
+                if target in full_cmd:
+                    print(f"Killing PID {proc.pid}: {full_cmd}")
+                    proc.kill()
+            except psutil.NoSuchProcess, psutil.AccessDenied:
+                pass
+
         time.sleep(2)
 
         return {"msg": "video streaming stopped"}
 
     if action == "start":
-        # try:
-        #    thread = Video_streaming_thread()
-        #    thread.start()
-        #    return {"msg": "video streaming started"}
-        # except Exception:
-        #    return {"msg": "video streaming not started"}
-
         process = subprocess.Popen(
             # [sys.executable, str(Path(__file__).parent / "stream_video.py")]
             ["/usr/bin/python3", str(Path(__file__).parent / "stream_video.py")]
