@@ -459,7 +459,8 @@ def video_streaming(action):
         #    return {"msg": "video streaming not started"}
 
         self.process = subprocess.Popen(
-            [sys.executable, str(Path(__file__).parent / "stream_video.py")]
+            # [sys.executable, str(Path(__file__).parent / "stream_video.py")]
+            ["python3", str(Path(__file__).parent / "stream_video.py")]
         )
         logging.info(str(self.process))
         return {"msg": "video streaming started"}
