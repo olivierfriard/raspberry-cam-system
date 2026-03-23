@@ -18,6 +18,7 @@ import shutil
 import socket
 import struct
 import subprocess
+import sys
 import threading
 import time
 from functools import wraps
@@ -444,7 +445,7 @@ def video_streaming(action):
     start/stop video streaming with uv4l
     """
 
-    logging.info("video streaming")
+    logging.info(f"video streaming: {action}")
 
     if action == "stop":
         return {"msg": "video streaming stopped"}
