@@ -444,6 +444,8 @@ def video_streaming(action):
     start/stop video streaming with uv4l
     """
 
+    logging.info("video streaming")
+
     if action == "stop":
         return {"msg": "video streaming stopped"}
 
