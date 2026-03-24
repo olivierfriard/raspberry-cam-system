@@ -875,7 +875,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 if self.all_video_cb.isChecked()
                 else Qt.CheckState.Unchecked
             )
-        self.all_new_video_cb.setCheckState(False)
+        self.all_new_video_cb.setChecked(False)
 
     def all_new_video_clicked(self):
         """
@@ -890,7 +890,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 if self.all_new_video_cb.isChecked()
                 else Qt.CheckState.Unchecked
             )
-        self.all_video_cb.setCheckState(False)
+        self.all_video_cb.setChecked(False)
 
     @verif
     def delete_videos_clicked(self):
