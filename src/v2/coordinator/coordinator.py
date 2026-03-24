@@ -30,6 +30,7 @@ from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
 import connections
+import coordinator_qrc
 import output_window
 import requests
 import time_lapse
@@ -182,7 +183,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         self.setupUi(self)
 
-        self.showMaximized()
+        # self.showMaximized()
         # .showFullScreen()
 
         connections.connect(self)
@@ -218,6 +219,8 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 self.raspberry_info[raspberry_ip] = dict(
                     raspberry_saved_settings[raspberry_ip]
                 )
+
+        self.splitter.widget(0).setMaximumWidth(200)
 
         self.status_timer = QTimer()
         self.status_timer.timeout.connect(self.get_status_for_all_rpi)
@@ -271,6 +274,8 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         self.cb_enable_picture_parameters.clicked.connect(
             self.enable_picture_parameters
         )
+
+        self.cb_enable_video_parameters.clicked.connect(self.enable_video_parameters)
 
         self.configure_picture_pb.clicked.connect(self.schedule_time_lapse_clicked)
         self.view_picture_schedule_pb.clicked.connect(
@@ -549,14 +554,19 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         start/stop video streaming on client and show output
         """
         if action == "start":
-            width, height = self.raspberry_info[raspberry_id]["video mode"].split("x")
-            data = {"width": width, "height": height}
+            if not self.raspberry_info[raspberry_id]["status"].get(
+                "video_streaming_active", False
+            ):
+                width, height = self.raspberry_info[raspberry_id]["video mode"].split(
+                    "x"
+                )
+                data = {"width": width, "height": height}
 
-            response = self.request(
-                raspberry_id, "/video_streaming/start", type="POST", data=data
-            )
-            if response is None:
-                return
+                response = self.request(
+                    raspberry_id, "/video_streaming/start", type="POST", data=data
+                )
+                if response is None:
+                    return
 
             # if response.status_code != HTTPStatus.OK:
             #    self.rasp_output_lb.setText(
@@ -576,18 +586,9 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
             # f"{cfg.PROTOCOL}{self.raspberry_ip[raspberry_id]}{cfg.SERVER_PORT}"
 
-            print(f"{self.raspberry_ip[raspberry_id]=}")  # remove before release
-
             self.video_stream_viewer.start_stream(
                 f"http://{self.raspberry_ip[raspberry_id]}:8000/stream.mjpg"
             )
-
-            # self.media_list.setSource(
-            #    QUrl(f"tcp://{self.raspberry_ip[raspberry_id]}:6000")
-            # )
-            #
-            # self.media_list.play()
-            # self.rasp_output_lb.setText("Video streaming active")
 
             # generate QR code
             """
@@ -1193,19 +1194,22 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         # tabs icon
         if self.raspberry_info[raspberry_id]["status"].get("video_recording", False):
-            self.rpi_tw.setTabIcon(cfg.VIDEO_REC_TAB_INDEX, QIcon("red.png"))
+            # self.rpi_tw.setTabIcon(cfg.VIDEO_REC_TAB_INDEX, QIcon("red.png"))
+            self.rpi_tw.setTabIcon(cfg.VIDEO_REC_TAB_INDEX, QIcon(":/red_led"))
         else:
             self.rpi_tw.setTabIcon(cfg.VIDEO_REC_TAB_INDEX, QIcon())
 
         if self.raspberry_info[raspberry_id]["status"].get(
             "video_streaming_active", False
         ):
-            self.rpi_tw.setTabIcon(cfg.VIDEO_STREAMING_TAB_INDEX, QIcon("red.png"))
+            # self.rpi_tw.setTabIcon(cfg.VIDEO_STREAMING_TAB_INDEX, QIcon("red.png"))
+            self.rpi_tw.setTabIcon(cfg.VIDEO_STREAMING_TAB_INDEX, QIcon(":/red_led"))
         else:
             self.rpi_tw.setTabIcon(cfg.VIDEO_STREAMING_TAB_INDEX, QIcon())
 
         if self.raspberry_info[raspberry_id]["status"].get("time_lapse_active", False):
-            self.rpi_tw.setTabIcon(cfg.TIME_LAPSE_TAB_INDEX, QIcon("red.png"))
+            # self.rpi_tw.setTabIcon(cfg.TIME_LAPSE_TAB_INDEX, QIcon("red.png"))
+            self.rpi_tw.setTabIcon(cfg.TIME_LAPSE_TAB_INDEX, QIcon(":/red_led"))
         else:
             self.rpi_tw.setTabIcon(cfg.TIME_LAPSE_TAB_INDEX, QIcon())
 
@@ -1483,7 +1487,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         )
         for x in range(self.rpi_list.count()):
             if self.rpi_list.item(x).text() == raspberry_id:
-                self.rpi_list.item(x).setIcon(QIcon(f"{color}.png"))
+                self.rpi_list.item(x).setIcon(QIcon(f":/{color}_led"))
 
     def get_status_for_all_rpi(self):
         """
@@ -1505,6 +1509,9 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 self.update_raspberry_dashboard(raspberry_id)
 
     def enable_picture_parameters(self):
+        """
+        enable/disable parameters for pictures
+        """
         self.lb_brightness.setEnabled(self.cb_enable_picture_parameters.isChecked())
         self.picture_brightness_sb.setEnabled(
             self.cb_enable_picture_parameters.isChecked()
@@ -1527,6 +1534,26 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         self.lb_gain.setEnabled(self.cb_enable_picture_parameters.isChecked())
         self.picture_gain_sb.setEnabled(self.cb_enable_picture_parameters.isChecked())
+
+    def enable_video_parameters(self):
+        """
+        enable/disable parameters for video
+        """
+
+        self.lb_video_brightness.setEnabled(self.cb_enable_video_parameters.isChecked())
+        self.video_brightness_sb.setEnabled(self.cb_enable_video_parameters.isChecked())
+
+        self.lb_video_contrast.setEnabled(self.cb_enable_video_parameters.isChecked())
+        self.video_contrast_sb.setEnabled(self.cb_enable_video_parameters.isChecked())
+
+        self.lb_video_sharpness.setEnabled(self.cb_enable_video_parameters.isChecked())
+        self.video_sharpness_sb.setEnabled(self.cb_enable_video_parameters.isChecked())
+
+        self.lb_video_saturation.setEnabled(self.cb_enable_video_parameters.isChecked())
+        self.video_saturation_sb.setEnabled(self.cb_enable_video_parameters.isChecked())
+
+        self.lb_video_gain.setEnabled(self.cb_enable_video_parameters.isChecked())
+        self.video_gain_sb.setEnabled(self.cb_enable_video_parameters.isChecked())
 
     @verif
     def take_picture_clicked(self, source_name):

@@ -87,7 +87,7 @@
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
           </property>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
@@ -162,14 +162,18 @@
              </layout>
             </item>
             <item>
-             <widget class="QListWidget" name="rpi_list"/>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="message_box"/>
+             <widget class="QListWidget" name="rpi_list">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="">
+          <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QLabel" name="raspberry_id_lb">
@@ -190,7 +194,7 @@
                <bool>false</bool>
               </property>
               <property name="currentIndex">
-               <number>0</number>
+               <number>3</number>
               </property>
               <widget class="QWidget" name="status_tab">
                <attribute name="title">
@@ -1259,8 +1263,8 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>739</width>
-                     <height>871</height>
+                     <width>1514</width>
+                     <height>856</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_22">
@@ -1367,6 +1371,49 @@
                             </widget>
                            </item>
                            <item>
+                            <widget class="QLabel" name="label_29">
+                             <property name="text">
+                              <string>Rotation</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QSpinBox" name="video_rotation_sb">
+                             <property name="accessibleName">
+                              <string>video rotation</string>
+                             </property>
+                             <property name="frame">
+                              <bool>true</bool>
+                             </property>
+                             <property name="maximum">
+                              <number>270</number>
+                             </property>
+                             <property name="singleStep">
+                              <number>90</number>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QCheckBox" name="video_hflip_cb">
+                             <property name="accessibleName">
+                              <string>video hflip</string>
+                             </property>
+                             <property name="text">
+                              <string>Horizontal flip</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QCheckBox" name="video_vflip_cb">
+                             <property name="accessibleName">
+                              <string>video vflip</string>
+                             </property>
+                             <property name="text">
+                              <string>Vertical flip</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
                             <spacer name="horizontalSpacer_11">
                              <property name="orientation">
                               <enum>Qt::Orientation::Horizontal</enum>
@@ -1386,67 +1433,14 @@
                        <item>
                         <layout class="QHBoxLayout" name="horizontalLayout_20">
                          <item>
-                          <widget class="QLabel" name="label_29">
+                          <widget class="QCheckBox" name="cb_enable_video_parameters">
                            <property name="text">
-                            <string>Rotation</string>
+                            <string>Enable video parameters</string>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <widget class="QSpinBox" name="video_rotation_sb">
-                           <property name="accessibleName">
-                            <string>video rotation</string>
-                           </property>
-                           <property name="frame">
-                            <bool>true</bool>
-                           </property>
-                           <property name="maximum">
-                            <number>270</number>
-                           </property>
-                           <property name="singleStep">
-                            <number>90</number>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QCheckBox" name="video_hflip_cb">
-                           <property name="accessibleName">
-                            <string>video hflip</string>
-                           </property>
-                           <property name="text">
-                            <string>Horizontal flip</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <widget class="QCheckBox" name="video_vflip_cb">
-                           <property name="accessibleName">
-                            <string>video vflip</string>
-                           </property>
-                           <property name="text">
-                            <string>Vertical flip</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item>
-                          <spacer name="horizontalSpacer_12">
-                           <property name="orientation">
-                            <enum>Qt::Orientation::Horizontal</enum>
-                           </property>
-                           <property name="sizeHint" stdset="0">
-                            <size>
-                             <width>40</width>
-                             <height>20</height>
-                            </size>
-                           </property>
-                          </spacer>
-                         </item>
-                        </layout>
-                       </item>
-                       <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_22">
-                         <item>
-                          <widget class="QLabel" name="label_31">
+                          <widget class="QLabel" name="lb_video_brightness">
                            <property name="text">
                             <string>Brightness</string>
                            </property>
@@ -1469,7 +1463,7 @@
                           </widget>
                          </item>
                          <item>
-                          <widget class="QLabel" name="label_30">
+                          <widget class="QLabel" name="lb_video_contrast">
                            <property name="text">
                             <string>Contrast</string>
                            </property>
@@ -1492,7 +1486,7 @@
                           </widget>
                          </item>
                          <item>
-                          <widget class="QLabel" name="Sharpness_2">
+                          <widget class="QLabel" name="lb_video_sharpness">
                            <property name="text">
                             <string>Sharpness</string>
                            </property>
@@ -1515,7 +1509,7 @@
                           </widget>
                          </item>
                          <item>
-                          <widget class="QLabel" name="label_32">
+                          <widget class="QLabel" name="lb_video_saturation">
                            <property name="text">
                             <string>Saturation</string>
                            </property>
@@ -1538,7 +1532,7 @@
                           </widget>
                          </item>
                          <item>
-                          <widget class="QLabel" name="label_33">
+                          <widget class="QLabel" name="lb_video_gain">
                            <property name="text">
                             <string>Gain</string>
                            </property>
@@ -1970,6 +1964,16 @@
         <string>Dashboard</string>
        </attribute>
       </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="message_box">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
      </widget>
     </item>
    </layout>

@@ -72,16 +72,23 @@ def start_video_recording(self, raspberry_id):
         "prefix": "",
         "framerate": self.raspberry_info[raspberry_id]["FPS"],
         "bitrate": self.raspberry_info[raspberry_id]["video quality"] * 1_000_000,
+        "rotation": self.raspberry_info[raspberry_id]["video rotation"],
+        "hflip": self.raspberry_info[raspberry_id]["video hflip"],
+        "vflip": self.raspberry_info[raspberry_id]["video vflip"],
         # "brightness": self.raspberry_info[raspberry_id]["video brightness"],
         # "contrast": self.raspberry_info[raspberry_id]["video contrast"],
         # "saturation": self.raspberry_info[raspberry_id]["video saturation"],
         # "sharpness": self.raspberry_info[raspberry_id]["video sharpness"],
         ## "ISO": self.raspberry_info[raspberry_id]['video iso'],
         # "gain": self.raspberry_info[raspberry_id]["video gain"],
-        # "rotation": self.raspberry_info[raspberry_id]["video rotation"],
-        # "hflip": self.raspberry_info[raspberry_id]["video hflip"],
-        # "vflip": self.raspberry_info[raspberry_id]["video vflip"],
     }
+
+    if self.cb_enable_video_parameters.isChecked():
+        data["brightness"] = self.raspberry_info[raspberry_id]["video brightness"]
+        data["contrast"] = self.raspberry_info[raspberry_id]["video contrast"]
+        data["saturation"] = self.raspberry_info[raspberry_id]["video saturation"]
+        data["sharpness"] = self.raspberry_info[raspberry_id]["video sharpness"]
+        data["gain"] = self.raspberry_info[raspberry_id]["video gain"]
 
     self.rasp_output_lb.setText("start video recording requested")
     response = self.request(raspberry_id, "/start_video", type="POST", data=data)

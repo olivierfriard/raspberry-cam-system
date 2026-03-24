@@ -88,14 +88,14 @@ class Ui_MainWindow(object):
         self.splitter = QSplitter(self.rasp_list_tab)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Orientation.Horizontal)
-        self.widget = QWidget(self.splitter)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(self.splitter)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.pb_scan_network = QPushButton(self.widget)
+        self.pb_scan_network = QPushButton(self.layoutWidget)
         self.pb_scan_network.setObjectName(u"pb_scan_network")
 
         self.horizontalLayout.addWidget(self.pb_scan_network)
@@ -109,7 +109,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.pb_up = QPushButton(self.widget)
+        self.pb_up = QPushButton(self.layoutWidget)
         self.pb_up.setObjectName(u"pb_up")
 
         self.horizontalLayout_3.addWidget(self.pb_up)
@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_17 = QHBoxLayout()
         self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
-        self.pb_down = QPushButton(self.widget)
+        self.pb_down = QPushButton(self.layoutWidget)
         self.pb_down.setObjectName(u"pb_down")
 
         self.horizontalLayout_17.addWidget(self.pb_down)
@@ -135,23 +135,19 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_17)
 
-        self.rpi_list = QListWidget(self.widget)
+        self.rpi_list = QListWidget(self.layoutWidget)
         self.rpi_list.setObjectName(u"rpi_list")
+        self.rpi_list.setMaximumSize(QSize(16777215, 16777215))
 
         self.verticalLayout.addWidget(self.rpi_list)
 
-        self.message_box = QLineEdit(self.widget)
-        self.message_box.setObjectName(u"message_box")
-
-        self.verticalLayout.addWidget(self.message_box)
-
-        self.splitter.addWidget(self.widget)
-        self.widget1 = QWidget(self.splitter)
-        self.widget1.setObjectName(u"widget1")
-        self.verticalLayout_3 = QVBoxLayout(self.widget1)
+        self.splitter.addWidget(self.layoutWidget)
+        self.layoutWidget1 = QWidget(self.splitter)
+        self.layoutWidget1.setObjectName(u"layoutWidget1")
+        self.verticalLayout_3 = QVBoxLayout(self.layoutWidget1)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.raspberry_id_lb = QLabel(self.widget1)
+        self.raspberry_id_lb = QLabel(self.layoutWidget1)
         self.raspberry_id_lb.setObjectName(u"raspberry_id_lb")
         font1 = QFont()
         font1.setPointSize(13)
@@ -160,7 +156,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.raspberry_id_lb)
 
-        self.rpi_tw = QTabWidget(self.widget1)
+        self.rpi_tw = QTabWidget(self.layoutWidget1)
         self.rpi_tw.setObjectName(u"rpi_tw")
         self.rpi_tw.setEnabled(False)
         self.status_tab = QWidget()
@@ -839,7 +835,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 739, 871))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 1514, 856))
         self.verticalLayout_22 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_22.setObjectName(u"verticalLayout_22")
         self.groupBox_3 = QGroupBox(self.scrollAreaWidgetContents)
@@ -913,6 +909,29 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_9.addWidget(self.video_fps_sb)
 
+        self.label_29 = QLabel(self.groupBox_3)
+        self.label_29.setObjectName(u"label_29")
+
+        self.horizontalLayout_9.addWidget(self.label_29)
+
+        self.video_rotation_sb = QSpinBox(self.groupBox_3)
+        self.video_rotation_sb.setObjectName(u"video_rotation_sb")
+        self.video_rotation_sb.setFrame(True)
+        self.video_rotation_sb.setMaximum(270)
+        self.video_rotation_sb.setSingleStep(90)
+
+        self.horizontalLayout_9.addWidget(self.video_rotation_sb)
+
+        self.video_hflip_cb = QCheckBox(self.groupBox_3)
+        self.video_hflip_cb.setObjectName(u"video_hflip_cb")
+
+        self.horizontalLayout_9.addWidget(self.video_hflip_cb)
+
+        self.video_vflip_cb = QCheckBox(self.groupBox_3)
+        self.video_vflip_cb.setObjectName(u"video_vflip_cb")
+
+        self.horizontalLayout_9.addWidget(self.video_vflip_cb)
+
         self.horizontalSpacer_11 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_9.addItem(self.horizontalSpacer_11)
@@ -925,42 +944,15 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_20 = QHBoxLayout()
         self.horizontalLayout_20.setObjectName(u"horizontalLayout_20")
-        self.label_29 = QLabel(self.groupBox_3)
-        self.label_29.setObjectName(u"label_29")
+        self.cb_enable_video_parameters = QCheckBox(self.groupBox_3)
+        self.cb_enable_video_parameters.setObjectName(u"cb_enable_video_parameters")
 
-        self.horizontalLayout_20.addWidget(self.label_29)
+        self.horizontalLayout_20.addWidget(self.cb_enable_video_parameters)
 
-        self.video_rotation_sb = QSpinBox(self.groupBox_3)
-        self.video_rotation_sb.setObjectName(u"video_rotation_sb")
-        self.video_rotation_sb.setFrame(True)
-        self.video_rotation_sb.setMaximum(270)
-        self.video_rotation_sb.setSingleStep(90)
+        self.lb_video_brightness = QLabel(self.groupBox_3)
+        self.lb_video_brightness.setObjectName(u"lb_video_brightness")
 
-        self.horizontalLayout_20.addWidget(self.video_rotation_sb)
-
-        self.video_hflip_cb = QCheckBox(self.groupBox_3)
-        self.video_hflip_cb.setObjectName(u"video_hflip_cb")
-
-        self.horizontalLayout_20.addWidget(self.video_hflip_cb)
-
-        self.video_vflip_cb = QCheckBox(self.groupBox_3)
-        self.video_vflip_cb.setObjectName(u"video_vflip_cb")
-
-        self.horizontalLayout_20.addWidget(self.video_vflip_cb)
-
-        self.horizontalSpacer_12 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-
-        self.horizontalLayout_20.addItem(self.horizontalSpacer_12)
-
-
-        self.verticalLayout_10.addLayout(self.horizontalLayout_20)
-
-        self.horizontalLayout_22 = QHBoxLayout()
-        self.horizontalLayout_22.setObjectName(u"horizontalLayout_22")
-        self.label_31 = QLabel(self.groupBox_3)
-        self.label_31.setObjectName(u"label_31")
-
-        self.horizontalLayout_22.addWidget(self.label_31)
+        self.horizontalLayout_20.addWidget(self.lb_video_brightness)
 
         self.video_brightness_sb = QDoubleSpinBox(self.groupBox_3)
         self.video_brightness_sb.setObjectName(u"video_brightness_sb")
@@ -968,12 +960,12 @@ class Ui_MainWindow(object):
         self.video_brightness_sb.setMaximum(1.000000000000000)
         self.video_brightness_sb.setSingleStep(0.010000000000000)
 
-        self.horizontalLayout_22.addWidget(self.video_brightness_sb)
+        self.horizontalLayout_20.addWidget(self.video_brightness_sb)
 
-        self.label_30 = QLabel(self.groupBox_3)
-        self.label_30.setObjectName(u"label_30")
+        self.lb_video_contrast = QLabel(self.groupBox_3)
+        self.lb_video_contrast.setObjectName(u"lb_video_contrast")
 
-        self.horizontalLayout_22.addWidget(self.label_30)
+        self.horizontalLayout_20.addWidget(self.lb_video_contrast)
 
         self.video_contrast_sb = QSpinBox(self.groupBox_3)
         self.video_contrast_sb.setObjectName(u"video_contrast_sb")
@@ -981,12 +973,12 @@ class Ui_MainWindow(object):
         self.video_contrast_sb.setMaximum(100)
         self.video_contrast_sb.setValue(1)
 
-        self.horizontalLayout_22.addWidget(self.video_contrast_sb)
+        self.horizontalLayout_20.addWidget(self.video_contrast_sb)
 
-        self.Sharpness_2 = QLabel(self.groupBox_3)
-        self.Sharpness_2.setObjectName(u"Sharpness_2")
+        self.lb_video_sharpness = QLabel(self.groupBox_3)
+        self.lb_video_sharpness.setObjectName(u"lb_video_sharpness")
 
-        self.horizontalLayout_22.addWidget(self.Sharpness_2)
+        self.horizontalLayout_20.addWidget(self.lb_video_sharpness)
 
         self.video_sharpness_sb = QSpinBox(self.groupBox_3)
         self.video_sharpness_sb.setObjectName(u"video_sharpness_sb")
@@ -994,12 +986,12 @@ class Ui_MainWindow(object):
         self.video_sharpness_sb.setMaximum(100)
         self.video_sharpness_sb.setValue(1)
 
-        self.horizontalLayout_22.addWidget(self.video_sharpness_sb)
+        self.horizontalLayout_20.addWidget(self.video_sharpness_sb)
 
-        self.label_32 = QLabel(self.groupBox_3)
-        self.label_32.setObjectName(u"label_32")
+        self.lb_video_saturation = QLabel(self.groupBox_3)
+        self.lb_video_saturation.setObjectName(u"lb_video_saturation")
 
-        self.horizontalLayout_22.addWidget(self.label_32)
+        self.horizontalLayout_20.addWidget(self.lb_video_saturation)
 
         self.video_saturation_sb = QSpinBox(self.groupBox_3)
         self.video_saturation_sb.setObjectName(u"video_saturation_sb")
@@ -1007,12 +999,12 @@ class Ui_MainWindow(object):
         self.video_saturation_sb.setMaximum(100)
         self.video_saturation_sb.setValue(1)
 
-        self.horizontalLayout_22.addWidget(self.video_saturation_sb)
+        self.horizontalLayout_20.addWidget(self.video_saturation_sb)
 
-        self.label_33 = QLabel(self.groupBox_3)
-        self.label_33.setObjectName(u"label_33")
+        self.lb_video_gain = QLabel(self.groupBox_3)
+        self.lb_video_gain.setObjectName(u"lb_video_gain")
 
-        self.horizontalLayout_22.addWidget(self.label_33)
+        self.horizontalLayout_20.addWidget(self.lb_video_gain)
 
         self.video_gain_sb = QSpinBox(self.groupBox_3)
         self.video_gain_sb.setObjectName(u"video_gain_sb")
@@ -1021,14 +1013,14 @@ class Ui_MainWindow(object):
         self.video_gain_sb.setSingleStep(1)
         self.video_gain_sb.setValue(1)
 
-        self.horizontalLayout_22.addWidget(self.video_gain_sb)
+        self.horizontalLayout_20.addWidget(self.video_gain_sb)
 
         self.horizontalSpacer_14 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
-        self.horizontalLayout_22.addItem(self.horizontalSpacer_14)
+        self.horizontalLayout_20.addItem(self.horizontalSpacer_14)
 
 
-        self.verticalLayout_10.addLayout(self.horizontalLayout_22)
+        self.verticalLayout_10.addLayout(self.horizontalLayout_20)
 
 
         self.verticalLayout_22.addWidget(self.groupBox_3)
@@ -1271,7 +1263,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.rpi_tw)
 
-        self.rasp_output_lb = QLabel(self.widget1)
+        self.rasp_output_lb = QLabel(self.layoutWidget1)
         self.rasp_output_lb.setObjectName(u"rasp_output_lb")
         font2 = QFont()
         font2.setPointSize(12)
@@ -1280,7 +1272,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.rasp_output_lb)
 
-        self.splitter.addWidget(self.widget1)
+        self.splitter.addWidget(self.layoutWidget1)
 
         self.horizontalLayout_29.addWidget(self.splitter)
 
@@ -1290,6 +1282,12 @@ class Ui_MainWindow(object):
         self.main_tw.addTab(self.dashboard_tab, "")
 
         self.verticalLayout_2.addWidget(self.main_tw)
+
+        self.message_box = QLineEdit(self.centralwidget)
+        self.message_box.setObjectName(u"message_box")
+        self.message_box.setMaximumSize(QSize(16777215, 16777215))
+
+        self.verticalLayout_2.addWidget(self.message_box)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -1314,7 +1312,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.main_tw.setCurrentIndex(0)
-        self.rpi_tw.setCurrentIndex(0)
+        self.rpi_tw.setCurrentIndex(3)
         self.tw_picture.setCurrentIndex(0)
         self.picture_schedule_tw.setCurrentIndex(0)
         self.video_rec_schedule_tw.setCurrentIndex(0)
@@ -1488,23 +1486,24 @@ class Ui_MainWindow(object):
         self.video_vflip_cb.setAccessibleName(QCoreApplication.translate("MainWindow", u"video vflip", None))
 #endif // QT_CONFIG(accessibility)
         self.video_vflip_cb.setText(QCoreApplication.translate("MainWindow", u"Vertical flip", None))
-        self.label_31.setText(QCoreApplication.translate("MainWindow", u"Brightness", None))
+        self.cb_enable_video_parameters.setText(QCoreApplication.translate("MainWindow", u"Enable video parameters", None))
+        self.lb_video_brightness.setText(QCoreApplication.translate("MainWindow", u"Brightness", None))
 #if QT_CONFIG(accessibility)
         self.video_brightness_sb.setAccessibleName(QCoreApplication.translate("MainWindow", u"video brightness", None))
 #endif // QT_CONFIG(accessibility)
-        self.label_30.setText(QCoreApplication.translate("MainWindow", u"Contrast", None))
+        self.lb_video_contrast.setText(QCoreApplication.translate("MainWindow", u"Contrast", None))
 #if QT_CONFIG(accessibility)
         self.video_contrast_sb.setAccessibleName(QCoreApplication.translate("MainWindow", u"video contrast", None))
 #endif // QT_CONFIG(accessibility)
-        self.Sharpness_2.setText(QCoreApplication.translate("MainWindow", u"Sharpness", None))
+        self.lb_video_sharpness.setText(QCoreApplication.translate("MainWindow", u"Sharpness", None))
 #if QT_CONFIG(accessibility)
         self.video_sharpness_sb.setAccessibleName(QCoreApplication.translate("MainWindow", u"video sharpness", None))
 #endif // QT_CONFIG(accessibility)
-        self.label_32.setText(QCoreApplication.translate("MainWindow", u"Saturation", None))
+        self.lb_video_saturation.setText(QCoreApplication.translate("MainWindow", u"Saturation", None))
 #if QT_CONFIG(accessibility)
         self.video_saturation_sb.setAccessibleName(QCoreApplication.translate("MainWindow", u"video saturation", None))
 #endif // QT_CONFIG(accessibility)
-        self.label_33.setText(QCoreApplication.translate("MainWindow", u"Gain", None))
+        self.lb_video_gain.setText(QCoreApplication.translate("MainWindow", u"Gain", None))
 #if QT_CONFIG(accessibility)
         self.video_gain_sb.setAccessibleName(QCoreApplication.translate("MainWindow", u"video gain", None))
 #endif // QT_CONFIG(accessibility)
