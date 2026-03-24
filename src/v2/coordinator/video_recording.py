@@ -8,6 +8,7 @@ import json
 import logging
 import pathlib as pl
 import shutil
+from functools import partial
 
 import config_coordinator as cfg
 import requests
@@ -407,33 +408,15 @@ def download_videos(self, raspberry_id, download_dir=""):
     """
 
     def thread_progress(output):
-        self.rasp_output_lb.setText(output)
+        # self.rasp_output_lb.setText(output)
+        pass
 
     def thread_finished(downloaded_video_list):
-        self.rasp_output_lb.setText(
-            f"{len(downloaded_video_list)} videos downloaded in <b>{download_dir}</b>"
-        )
-        self.video_list_clicked()
-        self.video_download_thread.quit
-
-    """
-    if download_dir == "":
-        download_dir = cfg.VIDEO_ARCHIVE
-
-    if not pl.Path(download_dir).is_dir():
-        QMessageBox.critical(None, "Raspberry Pi coordinator",
-                                f"Destination not found!<br>{cfg.VIDEO_ARCHIVE}<br><br>Choose another directory",
-                                QMessageBox.Ok | QMessageBox.Default, QMessageBox.NoButton)
-
-        new_download_dir = QFileDialog().getExistingDirectory(self,
-                                                                "Choose a directory to download videos",
-                                                                str(pathlib.Path.home()),
-                                                                options=QFileDialog.ShowDirsOnly)
-        if new_download_dir:
-            download_dir = new_download_dir
-        else:
-            return
-    """
+        # self.rasp_output_lb.setText(
+        #    f"{len(downloaded_video_list)} videos downloaded in <b>{download_dir}</b>"
+        # )
+        # self.video_list_clicked()
+        self.video_download_thread.quit()
 
     remote_video_list = video_list(self, raspberry_id)
     video_list_to_download = []
@@ -460,16 +443,33 @@ def download_videos(self, raspberry_id, download_dir=""):
     remote_video_archive_dir = response.json().get("msg", "")
 
     self.video_download_thread = QThread(parent=self)
-    self.video_download_thread.start()
+    # self.video_download_thread.start()
     self.video_download_worker = Download_videos_worker(self.raspberry_ip)
     self.video_download_worker.moveToThread(self.video_download_thread)
 
-    self.video_download_worker.start.connect(self.video_download_worker.run)
+    # self.video_download_worker.start.connect(self.video_download_worker.run)
     self.video_download_worker.progress.connect(thread_progress)
     self.video_download_worker.finished.connect(thread_finished)
-    self.video_download_worker.start.emit(
-        raspberry_id, video_list_to_download, download_dir, remote_video_archive_dir
+    # self.video_download_worker.start.emit(
+    #    raspberry_id, video_list_to_download, download_dir, remote_video_archive_dir
+    # )
+
+    self.video_download_worker.finished.connect(self.video_download_thread.quit)
+    self.video_download_thread.finished.connect(self.video_download_worker.deleteLater)
+    self.video_download_thread.finished.connect(self.video_download_thread.deleteLater)
+
+    self.video_download_thread.started.connect(
+        partial(
+            self.video_download_worker.run,
+            raspberry_id,
+            video_list_to_download,
+            download_dir,
+            remote_video_archive_dir,
+        )
+        #    raspberry_id, video_list_to_download, download_dir, remote_video_archive_dir
     )
+
+    self.video_download_thread.start()
 
 
 def delete_videos(self, raspberry_id):
