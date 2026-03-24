@@ -220,7 +220,11 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                     raspberry_saved_settings[raspberry_ip]
                 )
 
+        # set width of left panel
         self.splitter.widget(0).setMaximumWidth(200)
+        # self.splitter.setSizes([200, 800])
+
+        self.enable_video_parameters()
 
         self.status_timer = QTimer()
         self.status_timer.timeout.connect(self.get_status_for_all_rpi)
@@ -582,7 +586,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             # )
             #
 
-            time.sleep(3)
+            time.sleep(5)
 
             # f"{cfg.PROTOCOL}{self.raspberry_ip[raspberry_id]}{cfg.SERVER_PORT}"
 
@@ -1186,6 +1190,15 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 "video_streaming_active", False
             )
         )
+
+        # view video streaming if active on worker
+        if self.raspberry_info[raspberry_id]["status"].get(
+            "video_streaming_active", False
+        ):
+            self.video_stream_viewer.start_stream(
+                f"http://{self.raspberry_ip[raspberry_id]}:8000/stream.mjpg"
+            )
+
         self.pb_stop_video_streaming.setEnabled(
             self.raspberry_info[raspberry_id]["status"].get(
                 "video_streaming_active", False

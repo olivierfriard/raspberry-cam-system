@@ -473,8 +473,8 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>1387</width>
-                     <height>485</height>
+                     <width>1514</width>
+                     <height>856</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -532,6 +532,9 @@
                              </item>
                              <item>
                               <widget class="QCheckBox" name="picture_hflip_cb">
+                               <property name="enabled">
+                                <bool>false</bool>
+                               </property>
                                <property name="accessibleName">
                                 <string>picture hflip</string>
                                </property>
@@ -1441,6 +1444,9 @@
                          </item>
                          <item>
                           <widget class="QLabel" name="lb_video_brightness">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="text">
                             <string>Brightness</string>
                            </property>
@@ -1448,6 +1454,9 @@
                          </item>
                          <item>
                           <widget class="QDoubleSpinBox" name="video_brightness_sb">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="accessibleName">
                             <string>video brightness</string>
                            </property>
@@ -1464,6 +1473,9 @@
                          </item>
                          <item>
                           <widget class="QLabel" name="lb_video_contrast">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="text">
                             <string>Contrast</string>
                            </property>
@@ -1471,6 +1483,9 @@
                          </item>
                          <item>
                           <widget class="QSpinBox" name="video_contrast_sb">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="accessibleName">
                             <string>video contrast</string>
                            </property>
@@ -1487,6 +1502,9 @@
                          </item>
                          <item>
                           <widget class="QLabel" name="lb_video_sharpness">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="text">
                             <string>Sharpness</string>
                            </property>
@@ -1494,6 +1512,9 @@
                          </item>
                          <item>
                           <widget class="QSpinBox" name="video_sharpness_sb">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="accessibleName">
                             <string>video sharpness</string>
                            </property>
@@ -1510,6 +1531,9 @@
                          </item>
                          <item>
                           <widget class="QLabel" name="lb_video_saturation">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="text">
                             <string>Saturation</string>
                            </property>
@@ -1517,6 +1541,9 @@
                          </item>
                          <item>
                           <widget class="QSpinBox" name="video_saturation_sb">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="accessibleName">
                             <string>video saturation</string>
                            </property>
@@ -1533,6 +1560,9 @@
                          </item>
                          <item>
                           <widget class="QLabel" name="lb_video_gain">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="text">
                             <string>Gain</string>
                            </property>
@@ -1540,6 +1570,9 @@
                          </item>
                          <item>
                           <widget class="QSpinBox" name="video_gain_sb">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
                            <property name="accessibleName">
                             <string>video gain</string>
                            </property>
