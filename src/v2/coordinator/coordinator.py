@@ -9,9 +9,8 @@ TODO:
 
 """
 
-__version__ = "2.1.0"
-__version_date__ = "2026-03-23"
-
+__version__ = "2.2.0"
+__version_date__ = "2026-03-24"
 import argparse
 import base64
 import datetime
@@ -24,6 +23,7 @@ import subprocess
 import sys
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from http import HTTPStatus
 from multiprocessing.pool import ThreadPool
@@ -169,6 +169,41 @@ def get_wifi_ssid() -> str:
                 return line.split(":")[1].strip()
 
     return ""
+
+
+def has_http_server(ip: str, port: int = 5000, timeout: float = 5) -> bool:
+    try:
+        print(ip)
+        with socket.create_connection((ip, port), timeout=timeout) as sock:
+            sock.settimeout(timeout)
+            sock.sendall(b"HEAD / HTTP/1.0\r\nHost: %b\r\n\r\n" % ip.encode())
+            data = sock.recv(64)
+            return data.startswith(b"HTTP/")
+    except Exception:
+        print("error")
+        return False
+
+
+def scan_subnet_http(
+    base: str = "192.168.2", start: int = 1, end: int = 254, max_workers: int = 64
+):
+    found = []
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(has_http_server, f"{base}.{i}"): f"{base}.{i}"
+            for i in range(start, end + 1)
+        }
+
+        for future in as_completed(futures):
+            ip = futures[future]
+            try:
+                if future.result():
+                    found.append(ip)
+            except Exception:
+                pass
+
+    return sorted(found, key=lambda x: list(map(int, x.split("."))))
 
 
 class RPI_coordinator(QMainWindow, Ui_MainWindow):
@@ -1037,7 +1072,6 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
         for ip_config in cfg.IP_RANGES:
             ip_base_address, interval = ip_config[0], ip_config[1]
             self.scan_raspberries(ip_base_address, interval)
-
             if len(self.raspberry_ip):
                 self.message_box.setText(
                     f"Scanning done: {len(self.raspberry_ip)} Raspberry Pi found on {ip_config[0]}"
@@ -1046,6 +1080,11 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 self.message_box.setText(
                     f"Scanning done. No Raspberry Pi found were found on {ip_config[0]}"
                 )
+
+        # servers = scan_subnet_http("192.168.2")
+        # print("HTTP servers found:")
+        # for ip in servers:
+        #    print(ip)
 
         self.populate_rpi_list()
 
