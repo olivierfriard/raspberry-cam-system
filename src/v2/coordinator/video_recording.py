@@ -494,7 +494,7 @@ def delete_videos(self, raspberry_id):
         type="POST",
         data={"video list": json.dumps(video_list_to_delete)},
     )
-    if response == None:
+    if response is None:
         return
 
     if response.status_code != 200:
@@ -503,8 +503,8 @@ def delete_videos(self, raspberry_id):
         )
         return
 
-    self.all_video_cb.setCheckState(False)
-    self.all_new_video_cb.setCheckState(False)
+    self.all_video_cb.setChecked(False)
+    self.all_new_video_cb.setChecked(False)
     self.rasp_output_lb.setText(
         response.json().get("msg", "Error during deleting the video")
     )
