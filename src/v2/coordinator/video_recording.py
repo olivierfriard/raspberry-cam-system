@@ -381,13 +381,13 @@ def delete_video_recording_schedule(self, raspberry_id):
     self.view_video_recording_schedule_clicked()
 
 
-def video_list(self, raspberry_id: str) -> list:
+def video_list(self, raspberry_id: str) -> list | None:
     """
     request the list of recorded video to Raspberry Pi
     """
 
     response = self.request(raspberry_id, "/video_list")
-    if response == None:
+    if response is None:
         return
 
     if response.status_code != 200:
@@ -396,7 +396,7 @@ def video_list(self, raspberry_id: str) -> list:
         )
         return
     if "video_list" not in response.json():
-        self.rasp_output_lb.setText(f"Error requiring the list of recorded video")
+        self.rasp_output_lb.setText("Error requiring the list of recorded video")
         return
 
     return sorted(list(response.json()["video_list"]))
@@ -422,7 +422,7 @@ def download_videos(self, raspberry_id, download_dir=""):
     video_list_to_download = []
 
     for idx in range(self.video_list_lw.count()):
-        if self.video_list_lw.item(idx).checkState() == Qt.Checked:
+        if self.video_list_lw.item(idx).checkState() == Qt.CheckState.Checked:
             for video_file_name, video_size in remote_video_list:
                 if self.video_list_lw.item(idx).text() == video_file_name:
                     video_list_to_download.append((video_file_name, video_size))
@@ -438,7 +438,7 @@ def download_videos(self, raspberry_id, download_dir=""):
         )
         return
     if response.json().get("error", True):
-        self.rasp_output_lb.setText(f"Error requiring the video archive dir")
+        self.rasp_output_lb.setText("Error requiring the video archive dir")
         return
     remote_video_archive_dir = response.json().get("msg", "")
 
@@ -482,7 +482,7 @@ def delete_videos(self, raspberry_id):
     video_list_to_delete = []
 
     for idx in range(self.video_list_lw.count()):
-        if self.video_list_lw.item(idx).checkState() == Qt.Checked:
+        if self.video_list_lw.item(idx).checkState() == Qt.CheckState.Checked:
             for video_file_name, video_size in remote_video_list:
                 if self.video_list_lw.item(idx).text() == video_file_name:
                     video_list_to_delete.append((video_file_name, video_size))
