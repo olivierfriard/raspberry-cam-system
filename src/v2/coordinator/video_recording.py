@@ -72,15 +72,15 @@ def start_video_recording(self, raspberry_id):
         "prefix": "",
         "framerate": self.raspberry_info[raspberry_id]["FPS"],
         "bitrate": self.raspberry_info[raspberry_id]["video quality"] * 1_000_000,
-        "brightness": self.raspberry_info[raspberry_id]["video brightness"],
-        "contrast": self.raspberry_info[raspberry_id]["video contrast"],
-        "saturation": self.raspberry_info[raspberry_id]["video saturation"],
-        "sharpness": self.raspberry_info[raspberry_id]["video sharpness"],
-        # "ISO": self.raspberry_info[raspberry_id]['video iso'],
-        "gain": self.raspberry_info[raspberry_id]["video gain"],
-        "rotation": self.raspberry_info[raspberry_id]["video rotation"],
-        "hflip": self.raspberry_info[raspberry_id]["video hflip"],
-        "vflip": self.raspberry_info[raspberry_id]["video vflip"],
+        # "brightness": self.raspberry_info[raspberry_id]["video brightness"],
+        # "contrast": self.raspberry_info[raspberry_id]["video contrast"],
+        # "saturation": self.raspberry_info[raspberry_id]["video saturation"],
+        # "sharpness": self.raspberry_info[raspberry_id]["video sharpness"],
+        ## "ISO": self.raspberry_info[raspberry_id]['video iso'],
+        # "gain": self.raspberry_info[raspberry_id]["video gain"],
+        # "rotation": self.raspberry_info[raspberry_id]["video rotation"],
+        # "hflip": self.raspberry_info[raspberry_id]["video hflip"],
+        # "vflip": self.raspberry_info[raspberry_id]["video vflip"],
     }
 
     self.rasp_output_lb.setText("start video recording requested")
@@ -288,8 +288,8 @@ def schedule_video_recording(self, raspberry_id):
                     None,
                     "Raspberry Pi coordinator",
                     "The days(s) of week format is not correct. Example; 0,1,2 or SUN,MON,TUE",
-                    QMessageBox.Ok | QMessageBox.Default,
-                    QMessageBox.NoButton,
+                    QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                    QMessageBox.StandardButton.NoButton,
                 )
 
         dow_str = ",".join([str(x) for x in int_dow_splt])

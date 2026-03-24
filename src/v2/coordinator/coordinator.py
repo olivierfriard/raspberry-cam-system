@@ -703,7 +703,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             return
 
         for idx in range(self.video_list_lw.count()):
-            if self.video_list_lw.item(idx).checkState() == Qt.Checked:
+            if self.video_list_lw.item(idx).checkState() == Qt.CheckState.Checked:
                 break
         else:
             QMessageBox.information(
@@ -852,7 +852,7 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 item.setFont(font)
 
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Unchecked)
+            item.setCheckState(Qt.CheckState.Unchecked)
             self.video_list_lw.addItem(item)
 
     '''
@@ -871,7 +871,9 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
 
         for idx in range(self.video_list_lw.count()):
             self.video_list_lw.item(idx).setCheckState(
-                Qt.Checked if self.all_video_cb.isChecked() else Qt.Unchecked
+                Qt.CheckState.Checked
+                if self.all_video_cb.isChecked()
+                else Qt.CheckState.Unchecked
             )
         self.all_new_video_cb.setCheckState(False)
 
@@ -884,7 +886,9 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
             if not self.video_list_lw.item(idx).font().bold():
                 continue
             self.video_list_lw.item(idx).setCheckState(
-                Qt.Checked if self.all_new_video_cb.isChecked() else Qt.Unchecked
+                Qt.CheckState.Checked
+                if self.all_new_video_cb.isChecked()
+                else Qt.CheckState.Unchecked
             )
         self.all_video_cb.setCheckState(False)
 
@@ -899,21 +903,21 @@ class RPI_coordinator(QMainWindow, Ui_MainWindow):
                 None,
                 "Raspberry Pi coordinator",
                 "No video to delete",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
 
         for idx in range(self.video_list_lw.count()):
-            if self.video_list_lw.item(idx).checkState() == Qt.Checked:
+            if self.video_list_lw.item(idx).checkState() == Qt.CheckState.Checked:
                 break
         else:
             QMessageBox.information(
                 None,
                 "Raspberry Pi coordinator",
                 "Select the video to delete",
-                QMessageBox.Ok | QMessageBox.Default,
-                QMessageBox.NoButton,
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Default,
+                QMessageBox.StandardButton.NoButton,
             )
             return
 
