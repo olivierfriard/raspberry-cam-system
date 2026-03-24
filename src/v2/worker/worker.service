@@ -7,7 +7,7 @@ User=pi
 Group=pi
 WorkingDirectory=/home/pi/raspberry-cam-system
 Environment="PATH=/home/pi/raspberry-cam-system/.venv/bin:/usr/bin:/usr/sbin/:/bin"
-ExecStart=/home/pi/raspberry-cam-system/.venv/bin/python worker.py
+ExecStart=/home/pi/raspberry-cam-system/.venv/bin/python /home/pi/raspberry-cam-system/src/v2/worker/worker.py
 
 [Install]
 WantedBy=multi-user.target
