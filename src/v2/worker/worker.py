@@ -14,6 +14,7 @@ import fcntl
 import hashlib
 import json
 import logging
+import re
 import shutil
 import socket
 import struct
@@ -37,11 +38,56 @@ VCGENCMD_PATH = "/usr/bin/vcgencmd"
 # CAMERA_COMMAND = "libcamera-still" # deprecated on Debian trixie
 CAMERA_COMMAND = "rpicam-still"
 RPICAM_SHOT_SCRIPT = "rpicam_shot.bash"
-# VIDEO_COMMAND = "libcamera-vid"
+# VIDEO_COMMAND = "libcamera-vid" # deprecated on Debian trixie
 VIDEO_COMMAND = "rpicam-vid"
 
 
-def is_camera_detected():
+def get_camera_info():
+    try:
+        result = subprocess.run(
+            ["rpicam-hello", "--list-cameras"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        output = result.stdout
+    except subprocess.CalledProcessError as e:
+        return {
+            "ok": False,
+            "error": f"Comando fallito: {e}",
+            "model": None,
+            "resolutions": [],
+        }
+    except FileNotFoundError:
+        return {
+            "ok": False,
+            "error": "rpicam-hello non trovato",
+            "model": None,
+            "resolutions": [],
+        }
+
+    model = None
+    resolutions = []
+
+    for line in output.splitlines():
+        stripped = line.strip()
+
+        # esempio: 0 : imx477 [4056x3040 12-bit RGGB] (...)
+        m = re.match(r"^\d+\s*:\s*([^\s]+)\s+\[", stripped)
+        if m:
+            model = m.group(1)
+
+        # prende solo la risoluzione "principale" della modalità
+        m = re.match(r"^(?:Modes:\s*)?(?:'[^']+'\s*:\s*)?(\d+)x(\d+)", stripped)
+        if m:
+            res = f"{m.group(1)}x{m.group(2)}"
+            if res not in resolutions:
+                resolutions.append(res)
+
+    return {"ok": True, "model": model, "resolutions": resolutions}
+
+
+def is_camera_detected() -> str:
     """
         check if camera is plugged
 
